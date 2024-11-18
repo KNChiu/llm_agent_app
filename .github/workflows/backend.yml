@@ -25,7 +25,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         
-    - name: Test Setup
+    - name: Run Tests
+      working-directory: ./backend
       run: |
-        echo "Testing workflow setup"
-        python --version
+        pytest backend/tests/ -v
