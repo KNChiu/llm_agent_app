@@ -30,19 +30,25 @@ const ChatInterface = () => {
     setIsLoading(true);
 
     try {
-      // 模擬 API 調用
-      setTimeout(() => {
-        const response = {
-          id: Date.now() + 1,
-          text: '這是一個模擬的 AI 回應。在實際整合時，這裡會調用後端 API。',
-          sender: 'assistant',
-          timestamp: new Date().toISOString(),
-        };
-        setMessages(prev => [...prev, response]);
-        setIsLoading(false);
-      }, 1000);
+      const response = await fetch('http://localhost:8000/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: inputMessage }),
+      });
+      
+      const data = await response.json();
+      
+      setMessages(prev => [...prev, {
+        id: data.id,
+        text: data.message,
+        sender: 'assistant',
+        timestamp: data.timestamp,
+      }]);
     } catch (error) {
       console.error('Error sending message:', error);
+    } finally {
       setIsLoading(false);
     }
   };
