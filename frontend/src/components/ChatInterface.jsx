@@ -165,28 +165,28 @@ const ChatInterface = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
-      {/* Header */}
-      <div className="bg-white shadow-sm p-4">
-        <div className="max-w-4xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <h1 className="text-xl font-semibold text-gray-800">LLM Agent</h1>
+      {/* Header - 調整 padding 和字體大小 */}
+      <div className="bg-white shadow-sm p-2 sm:p-4">
+        <div className="max-w-4xl mx-auto flex justify-between items-center px-2">
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg sm:text-xl font-semibold text-gray-800">LLM Agent</h1>
             {backendStatus === 'offline' && (
-              <div className="flex items-center text-red-500 text-sm">
-                <AlertCircle className="w-4 h-4 mr-1" />
+              <div className="flex items-center text-red-500 text-xs sm:text-sm">
+                <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                 後端服務離線中請稍後
               </div>
             )}
           </div>
-          <div className="flex gap-4">
+          <div className="flex gap-2 sm:gap-4">
             <button 
               onClick={handleNewChat}
-              className="p-2 hover:bg-gray-100 rounded-full"
+              className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full"
               title="建立新對話"
             >
-              <PlusCircle className="w-5 h-5 text-gray-600" />
+              <PlusCircle className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
             </button>
             <button 
-              className={`p-2 rounded-full ${showHistory ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
+              className={`p-1.5 sm:p-2 rounded-full ${showHistory ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
               onClick={() => {
                 setShowHistory(!showHistory);
                 if (!showHistory) {
@@ -194,19 +194,19 @@ const ChatInterface = () => {
                 }
               }}
             >
-              <History className={`w-5 h-5 ${showHistory ? 'text-blue-600' : 'text-gray-600'}`} />
+              <History className={`w-4 h-4 sm:w-5 sm:h-5 ${showHistory ? 'text-blue-600' : 'text-gray-600'}`} />
             </button>
             <div className="relative" ref={settingsRef}>
               <button 
-                className={`p-2 rounded-full ${showSettings ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
+                className={`p-1.5 sm:p-2 rounded-full ${showSettings ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
                 onClick={() => setShowSettings(!showSettings)}
               >
-                <Settings className={`w-5 h-5 ${showSettings ? 'text-blue-600' : 'text-gray-600'}`} />
+                <Settings className={`w-4 h-4 sm:w-5 sm:h-5 ${showSettings ? 'text-blue-600' : 'text-gray-600'}`} />
               </button>
               
-              {/* 設定下拉選單 */}
+              {/* 設定下拉選單 - 調整寬度和位置 */}
               {showSettings && (
-                <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg p-4 z-50">
+                <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-64 bg-white rounded-lg shadow-lg p-4 z-50">
                   <div className="space-y-4">
                     {/* 模型選擇 */}
                     <div>
@@ -275,13 +275,13 @@ const ChatInterface = () => {
         </div>
       </div>
 
-      {/* 新增歷史記錄側邊欄 */}
+      {/* 歷史記錄側邊欄 - 在手機版改為全屏顯示 */}
       {showHistory && (
-        <div className="fixed right-0 top-0 h-full w-80 bg-white shadow-lg z-10 p-4 overflow-y-auto">
+        <div className="fixed inset-0 sm:right-0 sm:left-auto sm:top-0 h-full w-full sm:w-80 bg-white shadow-lg z-10 p-4 overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">聊天記錄</h2>
+            <h2 className="text-lg sm:text-xl font-bold">聊天記錄</h2>
             <button onClick={() => setShowHistory(false)}>
-              <XMarkIcon className="h-6 w-6" />
+              <XMarkIcon className="h-5 w-5 sm:h-6 sm:w-6" />
             </button>
           </div>
           <div className="space-y-4">
@@ -317,25 +317,25 @@ const ChatInterface = () => {
         </div>
       )}
 
-      {/* Chat Container */}
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="max-w-4xl mx-auto">
+      {/* Chat Container - 調整內邊距 */}
+      <div className="flex-1 overflow-y-auto p-2 sm:p-4">
+        <div className="max-w-4xl mx-auto px-2">
           {currentMessages.map((message) => (
             <div
               key={message.id}
               className={`flex ${
                 message.sender === 'user' ? 'justify-end' : 'justify-start'
-              } mb-4`}
+              } mb-3`}
             >
               <div
-                className={`p-3 rounded-lg max-w-[80%] ${
+                className={`p-2.5 sm:p-3 rounded-lg max-w-[85%] ${
                   message.sender === 'user'
                     ? 'bg-blue-500 text-white'
                     : 'bg-white text-gray-800 shadow'
                 }`}
               >
-                <p className="whitespace-pre-wrap">{message.text}</p>
-                <span className="text-xs opacity-75 block mt-1">
+                <p className="whitespace-pre-wrap text-sm sm:text-base">{message.text}</p>
+                <span className="text-[10px] sm:text-xs opacity-75 block mt-1">
                   {formatDateTime(message.timestamp)}
                 </span>
               </div>
@@ -356,14 +356,14 @@ const ChatInterface = () => {
         </div>
       </div>
 
-      {/* Input Area */}
-      <div className="bg-white border-t p-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex gap-4">
+      {/* Input Area - 調整輸入區域的佈局 */}
+      <div className="bg-white border-t p-2 sm:p-4">
+        <div className="max-w-4xl mx-auto px-2">
+          <div className="flex gap-2 sm:gap-4">
             <select
               value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}
-              className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+              className="p-1.5 sm:p-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
             >
               {models.map(model => (
                 <option key={model.id} value={model.id}>
@@ -377,7 +377,7 @@ const ChatInterface = () => {
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="輸入訊息..."
-                className="w-full p-3 pr-12 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500 resize-none"
+                className="w-full p-2 sm:p-3 pr-10 text-sm sm:text-base rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500 resize-none"
                 rows="1"
                 style={{ maxHeight: '150px' }}
               />
@@ -385,13 +385,13 @@ const ChatInterface = () => {
             <button
               onClick={handleSendMessage}
               disabled={isLoading || !inputMessage.trim()}
-              className={`p-3 rounded-lg ${
+              className={`p-2 sm:p-3 rounded-lg ${
                 isLoading || !inputMessage.trim()
                   ? 'bg-gray-300 cursor-not-allowed'
                   : 'bg-blue-500 hover:bg-blue-600'
               } text-white`}
             >
-              <Send className="w-5 h-5" />
+              <Send className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
