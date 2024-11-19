@@ -36,7 +36,7 @@ def client():
 @pytest.mark.asyncio
 async def test_create_chat(client, monkeypatch):
     # 模擬 OpenAI API 響應
-    async def mock_call_openai_api(message: str, model: str = "gpt-4o-mini") -> str:
+    async def mock_call_openai_api(message: str, model: str = "gpt-4o-mini", temperature: float = 0.7, max_tokens: int = 1000) -> str:
         return f"這是來自 {model} 的測試回應"
     
     monkeypatch.setattr("main.call_openai_api", mock_call_openai_api)
@@ -67,7 +67,7 @@ async def test_create_chat(client, monkeypatch):
 @pytest.mark.asyncio
 async def test_create_chat_error(client, monkeypatch):
     # 模擬 OpenAI API 錯誤
-    async def mock_call_openai_api_error(message: str, model: str = "gpt-4o-mini") -> str:
+    async def mock_call_openai_api_error(message: str, model: str = "gpt-4o-mini", temperature: float = 0.7, max_tokens: int = 1000) -> str:
         raise Exception("Error calling OpenAI API")
     
     monkeypatch.setattr("main.call_openai_api", mock_call_openai_api_error)
