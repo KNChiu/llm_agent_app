@@ -1,14 +1,11 @@
 FROM python:3.10-slim
 
-WORKDIR /app
+WORKDIR /backend
 
 # 安裝系統依賴
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     && rm -rf /var/lib/apt/lists/*
-
-# 確保先創建工作目錄
-RUN mkdir -p /app
 
 # 複製 requirements.txt
 COPY requirements.txt .
@@ -20,7 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # 創建數據目錄
-RUN mkdir -p /app/data
+RUN mkdir -p /backend/data
 
 # 添加健康檢查
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
