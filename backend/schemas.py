@@ -5,6 +5,8 @@ from datetime import datetime
 class ChatRequest(BaseModel):
     message: str
     model: str = "gpt-4o-mini"
+    temperature: float = 0.7
+    max_tokens: int = 1000
 
 class ChatResponse(BaseModel):
     id: int

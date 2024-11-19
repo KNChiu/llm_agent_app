@@ -59,8 +59,13 @@ async def create_chat(chat: schemas.ChatRequest, db: Session = Depends(get_db)):
             timestamp=datetime.now()
         )
         
-        # 傳入選擇的模型
-        response = await call_openai_api(chat.message, chat.model)
+        # 傳入所有參數
+        response = await call_openai_api(
+            chat.message, 
+            chat.model,
+            chat.temperature,
+            chat.max_tokens
+        )
         
         # 更新對話記錄
         db_chat.assistant_message = response
@@ -92,18 +97,17 @@ def read_chat_history(
     chats = db.query(models.Chat).offset(skip).limit(limit).all()
     return chats
 
-async def call_openai_api(message: str, model: str = "gpt-4o-mini") -> str:
+async def call_openai_api(message: str, model: str = "gpt-4o-mini", temperature: float = 0.7, max_tokens: int = 1000) -> str:
     try:
         client = AsyncOpenAI()
         
-        # 使用傳入的模型參數
         response = await client.chat.completions.create(
             model=model,
             messages=[
                 {"role": "user", "content": message}
             ],
-            temperature=0.7,
-            max_tokens=1000
+            temperature=temperature,
+            max_tokens=max_tokens
         )
         return response.choices[0].message.content
     except Exception as e:

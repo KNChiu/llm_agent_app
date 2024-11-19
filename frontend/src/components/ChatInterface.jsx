@@ -8,9 +8,13 @@ const ChatInterface = () => {
   const [historyMessages, setHistoryMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef(null);
   const [showHistory, setShowHistory] = useState(false);
   const [selectedModel, setSelectedModel] = useState('gpt-4o-mini');
+  const [temperature, setTemperature] = useState(0.7);
+  const [maxTokens, setMaxTokens] = useState(1000);
+  const [showSettings, setShowSettings] = useState(false);
+  const messagesEndRef = useRef(null);
+  const settingsRef = useRef(null);
 
   const models = [
     { id: 'gpt-4o-mini', name: 'GPT-4o-mini' },
@@ -93,7 +97,12 @@ const ChatInterface = () => {
     setIsLoading(true);
 
     try {
-      const response = await chatService.sendMessage(inputMessage, selectedModel);
+      const response = await chatService.sendMessage(
+        inputMessage, 
+        selectedModel,
+        temperature,
+        maxTokens
+      );
       setCurrentMessages(prev => [...prev, {
         id: response.id,
         text: response.message,
@@ -118,6 +127,20 @@ const ChatInterface = () => {
   const handleNewChat = () => {
     setCurrentMessages([]);
   };
+
+  // 點擊外部關閉設定
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (settingsRef.current && !settingsRef.current.contains(event.target)) {
+        setShowSettings(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
@@ -144,9 +167,81 @@ const ChatInterface = () => {
             >
               <History className={`w-5 h-5 ${showHistory ? 'text-blue-600' : 'text-gray-600'}`} />
             </button>
-            <button className="p-2 hover:bg-gray-100 rounded-full">
-              <Settings className="w-5 h-5 text-gray-600" />
-            </button>
+            <div className="relative" ref={settingsRef}>
+              <button 
+                className={`p-2 rounded-full ${showSettings ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
+                onClick={() => setShowSettings(!showSettings)}
+              >
+                <Settings className={`w-5 h-5 ${showSettings ? 'text-blue-600' : 'text-gray-600'}`} />
+              </button>
+              
+              {/* 設定下拉選單 */}
+              {showSettings && (
+                <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg p-4 z-50">
+                  <div className="space-y-4">
+                    {/* 模型選擇 */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        語言模型
+                      </label>
+                      <select
+                        value={selectedModel}
+                        onChange={(e) => setSelectedModel(e.target.value)}
+                        className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                      >
+                        {models.map(model => (
+                          <option key={model.id} value={model.id}>
+                            {model.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Temperature 設定 */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Temperature: {temperature}
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.1"
+                        value={temperature}
+                        onChange={(e) => setTemperature(parseFloat(e.target.value))}
+                        className="w-full"
+                      />
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>精確</span>
+                        <span>創意</span>
+                      </div>
+                    </div>
+
+                    {/* Max Tokens 設定 */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        最大 Token 數: {maxTokens}
+                      </label>
+                      <input
+                        type="range"
+                        min="100"
+                        max="4000"
+                        step="100"
+                        value={maxTokens}
+                        onChange={(e) => setMaxTokens(parseInt(e.target.value))}
+                        className="w-full"
+                      />
+                    </div>
+
+                    {/* 說明文字 */}
+                    <div className="text-xs text-gray-500 pt-2 border-t">
+                      <p className="mb-1">• Temperature 越高，回應越有創意性</p>
+                      <p>• Token 數越大，回應可以越長</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
