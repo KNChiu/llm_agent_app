@@ -68,7 +68,7 @@ async def test_create_chat(client, monkeypatch):
 async def test_create_chat_error(client, monkeypatch):
     # 模擬 OpenAI API 錯誤
     async def mock_call_openai_api_error(message: str, model: str = "gpt-4o-mini") -> str:
-        raise Exception("API 錯誤")
+        raise Exception("Error calling OpenAI API")
     
     monkeypatch.setattr("main.call_openai_api", mock_call_openai_api_error)
     
