@@ -7,13 +7,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# 只複製依賴文件
+# 確保先創建工作目錄
+RUN mkdir -p /app
+
+# 複製 requirements.txt
 COPY requirements.txt .
 
 # 安裝 Python 依賴
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 複製源代碼
+# 複製其餘檔案
 COPY . .
 
 # 創建數據目錄
