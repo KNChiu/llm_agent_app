@@ -228,6 +228,13 @@ async def call_openai_api(message: str, model: str = "gpt-4-mini", temperature: 
         logger.error(f"OpenAI API error: {str(e)}")
         raise HTTPException(status_code=500, detail="Error calling OpenAI API")
 
+@app.get("/health")
+async def health_check():
+    """
+    健康檢查端點
+    """
+    return {"status": "ok", "timestamp": datetime.now().isoformat()}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

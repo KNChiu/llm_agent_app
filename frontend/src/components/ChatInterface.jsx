@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Settings, History, PlusCircle } from 'lucide-react';
+import { Send, Settings, History, PlusCircle, AlertCircle } from 'lucide-react';
 import { chatService } from '../services/api';
 import { XMarkIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
 
@@ -15,6 +15,7 @@ const ChatInterface = () => {
   const [showSettings, setShowSettings] = useState(false);
   const messagesEndRef = useRef(null);
   const settingsRef = useRef(null);
+  const [backendStatus, setBackendStatus] = useState('checking'); // 'checking' | 'online' | 'offline'
 
   const models = [
     { id: 'gpt-4o-mini', name: 'GPT-4o-mini' },
@@ -142,12 +143,40 @@ const ChatInterface = () => {
     };
   }, []);
 
+  // 添加健康檢查
+  useEffect(() => {
+    const checkBackendHealth = async () => {
+      try {
+        await chatService.checkHealth();
+        setBackendStatus('online');
+      } catch (error) {
+        setBackendStatus('offline');
+      }
+    };
+
+    // 初始檢查
+    checkBackendHealth();
+
+    // 每 30 秒檢查一次
+    const interval = setInterval(checkBackendHealth, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="flex flex-col h-screen bg-gray-100">
       {/* Header */}
       <div className="bg-white shadow-sm p-4">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
-          <h1 className="text-xl font-semibold text-gray-800">LLM Agent</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl font-semibold text-gray-800">LLM Agent</h1>
+            {backendStatus === 'offline' && (
+              <div className="flex items-center text-red-500 text-sm">
+                <AlertCircle className="w-4 h-4 mr-1" />
+                後端服務離線中請稍後
+              </div>
+            )}
+          </div>
           <div className="flex gap-4">
             <button 
               onClick={handleNewChat}
