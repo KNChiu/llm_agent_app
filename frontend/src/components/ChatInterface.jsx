@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Settings, History } from 'lucide-react';
+import { Send, Settings, History, PlusCircle } from 'lucide-react';
 import { chatService } from '../services/api';
 import { XMarkIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
 
@@ -114,6 +114,11 @@ const ChatInterface = () => {
     }
   };
 
+  // 添加新對話函數
+  const handleNewChat = () => {
+    setCurrentMessages([]);
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gray-100">
       {/* Header */}
@@ -121,6 +126,13 @@ const ChatInterface = () => {
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <h1 className="text-xl font-semibold text-gray-800">LLM Agent</h1>
           <div className="flex gap-4">
+            <button 
+              onClick={handleNewChat}
+              className="p-2 hover:bg-gray-100 rounded-full"
+              title="建立新對話"
+            >
+              <PlusCircle className="w-5 h-5 text-gray-600" />
+            </button>
             <button 
               className={`p-2 rounded-full ${showHistory ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
               onClick={() => {
