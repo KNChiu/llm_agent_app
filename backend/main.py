@@ -59,8 +59,8 @@ async def create_chat(chat: schemas.ChatRequest, db: Session = Depends(get_db)):
             timestamp=datetime.now()
         )
         
-        # 調用 OpenAI API
-        response = await call_openai_api(chat.message)
+        # 傳入選擇的模型
+        response = await call_openai_api(chat.message, chat.model)
         
         # 更新對話記錄
         db_chat.assistant_message = response
@@ -92,15 +92,13 @@ def read_chat_history(
     chats = db.query(models.Chat).offset(skip).limit(limit).all()
     return chats
 
-async def call_openai_api(message: str) -> str:
+async def call_openai_api(message: str, model: str = "gpt-4o-mini") -> str:
     try:
-        # 建立 OpenAI 客戶端
         client = AsyncOpenAI()
-
         
-        # 使用新的 API 格式
+        # 使用傳入的模型參數
         response = await client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model=model,
             messages=[
                 {"role": "user", "content": message}
             ],

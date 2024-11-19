@@ -12,9 +12,12 @@ const apiClient = axios.create({
 
 export const chatService = {
   // 發送聊天訊息
-  sendMessage: async (message) => {
+  sendMessage: async (message, model = 'gpt-4o-mini') => {
     try {
-      const response = await apiClient.post('/chat', { message });
+      const response = await apiClient.post('/chat', { 
+        message,
+        model 
+      });
       return response.data;
     } catch (error) {
       console.error('Error sending message:', error);

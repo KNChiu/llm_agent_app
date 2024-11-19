@@ -1,10 +1,10 @@
 # schemas.py
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
 
 class ChatRequest(BaseModel):
     message: str
+    model: str = "gpt-4o-mini"
 
 class ChatResponse(BaseModel):
     id: int

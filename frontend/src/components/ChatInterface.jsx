@@ -10,6 +10,12 @@ const ChatInterface = () => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [selectedModel, setSelectedModel] = useState('gpt-4o-mini');
+
+  const models = [
+    { id: 'gpt-4o-mini', name: 'GPT-4o-mini' },
+    { id: 'gpt-4o', name: 'GPT-4o' },
+  ];
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -87,7 +93,7 @@ const ChatInterface = () => {
     setIsLoading(true);
 
     try {
-      const response = await chatService.sendMessage(inputMessage);
+      const response = await chatService.sendMessage(inputMessage, selectedModel);
       setCurrentMessages(prev => [...prev, {
         id: response.id,
         text: response.message,
@@ -218,6 +224,17 @@ const ChatInterface = () => {
       <div className="bg-white border-t p-4">
         <div className="max-w-4xl mx-auto">
           <div className="flex gap-4">
+            <select
+              value={selectedModel}
+              onChange={(e) => setSelectedModel(e.target.value)}
+              className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+            >
+              {models.map(model => (
+                <option key={model.id} value={model.id}>
+                  {model.name}
+                </option>
+              ))}
+            </select>
             <div className="flex-1 relative">
               <textarea
                 value={inputMessage}
