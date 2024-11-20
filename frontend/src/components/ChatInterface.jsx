@@ -98,12 +98,28 @@ const ChatInterface = () => {
     setIsLoading(true);
 
     try {
+      // 重構上下文數組的處理方式
+      const context = [];
+      for (let i = 0; i < currentMessages.length; i += 2) {
+        const userMsg = currentMessages[i];
+        const assistantMsg = currentMessages[i + 1];
+        
+        if (userMsg && userMsg.sender === 'user') {
+          context.push({
+            user_message: userMsg.text,
+            assistant_message: assistantMsg?.text || ''
+          });
+        }
+      }
+
       const response = await chatService.sendMessage(
-        inputMessage, 
+        inputMessage,
+        context,
         selectedModel,
         temperature,
         maxTokens
       );
+      
       setCurrentMessages(prev => [...prev, {
         id: response.id,
         text: response.message,

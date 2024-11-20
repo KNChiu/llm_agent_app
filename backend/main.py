@@ -61,10 +61,7 @@ async def create_chat(chat: schemas.ChatRequest, db: Session = Depends(get_db)):
     - **message**: 使用者輸入的訊息
     - 返回: 包含 AI 回應的對話記錄
     """
-    try:
-        # 記錄用戶請求
-        logger.info(f"User: {chat.message}")
-        
+    try:        
         # 創建對話歷史記錄
         db_chat = models.Chat(
             user_message=chat.message,
@@ -76,7 +73,8 @@ async def create_chat(chat: schemas.ChatRequest, db: Session = Depends(get_db)):
             chat.message, 
             chat.model,
             chat.temperature,
-            chat.max_tokens
+            chat.max_tokens,
+            chat.context
         )
         
         # 記錄 AI 回應
@@ -178,7 +176,7 @@ async def get_logs(
                     # 重置對話和過濾標記
                     current_conversation = [log.strip()]
                     should_include_conversation = passes_date_filter and passes_keyword_filter
-                elif any(marker in log for marker in ["Params:", "Assistant:", "Chat error:"]):
+                elif any(marker in log for marker in ["Params:", "Context:", "Assistant:", "Chat error:"]):
                     if current_conversation:
                         current_conversation.append(log.strip())
                         # 更新過濾標記
@@ -210,16 +208,32 @@ async def get_logs(
         logger.error(f"讀取日誌出錯: {str(e)}")
         raise HTTPException(status_code=500, detail="無法讀取日誌文件")
 
-async def call_openai_api(message: str, model: str = "gpt-4-mini", temperature: float = 0.7, max_tokens: int = 1000) -> str:
+async def call_openai_api(message: str, model: str = "gpt-4-mini", temperature: float = 0.7, max_tokens: int = 1000, context: list = []) -> str:
     try:
-        logger.info(f"Params: model: {model}, temperature: {temperature}")
+
+        # 記錄用戶請求和上下文
+        logger.info(f"User: {message}")
+        if context:
+            logger.info(f"Context: {context}")
+            
+        # 記錄參數
+        logger.info(f"Params: model={model}, temperature={temperature}, max_tokens={max_tokens}")
+
         client = AsyncOpenAI()
         
+        # 構建消息歷史
+        messages = []
+        for ctx in context:
+            messages.append({"role": "user", "content": ctx["user_message"]})
+            if ctx.get("assistant_message"):
+                messages.append({"role": "assistant", "content": ctx["assistant_message"]})
+        
+        # 添加當前消息
+        messages.append({"role": "user", "content": message})
+        print(messages)
         response = await client.chat.completions.create(
             model=model,
-            messages=[
-                {"role": "user", "content": message}
-            ],
+            messages=messages,
             temperature=temperature,
             max_tokens=max_tokens
         )

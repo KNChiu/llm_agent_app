@@ -7,6 +7,7 @@ class ChatRequest(BaseModel):
     model: str = "gpt-4o-mini"
     temperature: float = 0.7
     max_tokens: int = 1000
+    context: list = []
 
 class ChatResponse(BaseModel):
     id: int

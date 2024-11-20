@@ -12,10 +12,11 @@ const apiClient = axios.create({
 
 export const chatService = {
   // 發送聊天訊息
-  sendMessage: async (message, model = 'gpt-4o-mini', temperature = 0.7, maxTokens = 1000) => {
+  sendMessage: async (message, context = [], model = 'gpt-4o-mini', temperature = 0.7, maxTokens = 1000) => {
     try {
       const response = await apiClient.post('/chat', { 
         message,
+        context,
         model,
         temperature,
         max_tokens: maxTokens
