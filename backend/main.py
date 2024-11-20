@@ -215,7 +215,7 @@ async def call_openai_api(message: str, model: str = "gpt-4-mini", temperature: 
         logger.info(f"User: {message}")
         if context:
             logger.info(f"Context: {context}")
-            
+
         # 記錄參數
         logger.info(f"Params: model={model}, temperature={temperature}, max_tokens={max_tokens}")
 
@@ -230,7 +230,6 @@ async def call_openai_api(message: str, model: str = "gpt-4-mini", temperature: 
         
         # 添加當前消息
         messages.append({"role": "user", "content": message})
-        print(messages)
         response = await client.chat.completions.create(
             model=model,
             messages=messages,
