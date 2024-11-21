@@ -2,6 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Send, Settings, History, PlusCircle, AlertCircle, Copy, Check } from 'lucide-react';
 import { chatService } from '../services/api';
 import { XMarkIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
+import hljs from 'highlight.js';
+import 'highlight.js/styles/github-dark.css';
+import python from 'highlight.js/lib/languages/python';
+
+// 註冊 Python 語言支援
+hljs.registerLanguage('python', python);
 
 const ChatInterface = () => {
   const [currentMessages, setCurrentMessages] = useState([]);
@@ -191,6 +197,82 @@ const ChatInterface = () => {
     }
   };
 
+  // 添加程式碼複製狀態
+  const [copiedCodeIndex, setCopiedCodeIndex] = useState(null);
+
+  // 處理程式碼複製
+  const handleCopyCode = async (code, index) => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopiedCodeIndex(index);
+      setTimeout(() => setCopiedCodeIndex(null), 2000);
+    } catch (err) {
+      console.error('複製失敗:', err);
+    }
+  };
+
+  // 修改訊息渲染部分
+  const MessageContent = ({ text }) => {
+    const renderContent = () => {
+      if (text.includes('```')) {
+        const parts = text.split(/(```[\s\S]*?```)/);
+        return parts.map((part, index) => {
+          if (part.startsWith('```') && part.endsWith('```')) {
+            const lines = part.split('\n');
+            const language = lines[0].replace('```', '').trim();
+            const code = lines.slice(1, -1).join('\n');
+            
+            try {
+              const highlightedCode = hljs.highlight(code, {
+                language: language || 'plaintext',
+                ignoreIllegals: true
+              }).value;
+
+              return (
+                <div key={index} className="my-2">
+                  <div className="bg-gray-800 text-gray-200 px-4 py-1 text-sm rounded-t-lg flex justify-between items-center">
+                    <span>{language || '程式碼'}</span>
+                    <button
+                      onClick={() => handleCopyCode(code, index)}
+                      className="hover:bg-gray-700 p-1 rounded"
+                      title="複製程式碼"
+                    >
+                      {copiedCodeIndex === index ? (
+                        <Check className="w-4 h-4 text-green-500" />
+                      ) : (
+                        <Copy className="w-4 h-4 text-gray-300 hover:text-white" />
+                      )}
+                    </button>
+                  </div>
+                  <pre className="m-0">
+                    <code
+                      className={`hljs language-${language}`}
+                      dangerouslySetInnerHTML={{ __html: highlightedCode }}
+                      style={{
+                        display: 'block',
+                        background: '#1a1a1a',
+                        padding: '1rem',
+                        borderRadius: '0 0 0.5rem 0.5rem',
+                        overflowX: 'auto'
+                      }}
+                    />
+                  </pre>
+                </div>
+              );
+            } catch (error) {
+              console.warn('程式碼高亮處理失敗:', error);
+              return <pre key={index} className="my-2 bg-gray-900 text-gray-100 p-4 rounded-lg">{code}</pre>;
+            }
+          }
+          return <span key={index}>{part}</span>;
+        });
+      }
+      return <p className="whitespace-pre-wrap">{text}</p>;
+    };
+
+    return <div>{renderContent()}</div>;
+  };
+
   return (
     <div className="flex flex-col h-[100dvh] bg-gray-100">
       {/* Header */}
@@ -362,7 +444,7 @@ const ChatInterface = () => {
                     : 'bg-white text-gray-800 shadow'
                 }`}
               >
-                <p className="whitespace-pre-wrap">{message.text}</p>
+                <MessageContent text={message.text} />
                 <div className="flex justify-between items-center mt-1">
                   <span className="text-xs opacity-75">
                     {formatDateTime(message.timestamp)}
