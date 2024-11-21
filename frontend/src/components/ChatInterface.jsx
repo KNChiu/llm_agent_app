@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Settings, History, PlusCircle, AlertCircle } from 'lucide-react';
+import { Send, Settings, History, PlusCircle, AlertCircle, Copy, Check } from 'lucide-react';
 import { chatService } from '../services/api';
 import { XMarkIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
 
@@ -16,6 +16,7 @@ const ChatInterface = () => {
   const messagesEndRef = useRef(null);
   const settingsRef = useRef(null);
   const [backendStatus, setBackendStatus] = useState('checking'); // 'checking' | 'online' | 'offline'
+  const [copiedMessageId, setCopiedMessageId] = useState(null);
 
   const models = [
     { id: 'gpt-4o-mini', name: 'GPT-4o-mini' },
@@ -178,6 +179,17 @@ const ChatInterface = () => {
 
     return () => clearInterval(interval);
   }, []);
+
+  // 添加複製功能
+  const handleCopyMessage = async (text, messageId) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedMessageId(messageId);
+      setTimeout(() => setCopiedMessageId(null), 2000); // 2秒後重置複製狀態
+    } catch (err) {
+      console.error('複製失敗:', err);
+    }
+  };
 
   return (
     <div className="flex flex-col h-[100dvh] bg-gray-100">
@@ -344,16 +356,31 @@ const ChatInterface = () => {
               } mb-4`}
             >
               <div
-                className={`p-3 rounded-lg max-w-[80%] ${
+                className={`p-3 rounded-lg max-w-[80%] relative group ${
                   message.sender === 'user'
                     ? 'bg-blue-500 text-white'
                     : 'bg-white text-gray-800 shadow'
                 }`}
               >
                 <p className="whitespace-pre-wrap">{message.text}</p>
-                <span className="text-xs opacity-75 block mt-1">
-                  {formatDateTime(message.timestamp)}
-                </span>
+                <div className="flex justify-between items-center mt-1">
+                  <span className="text-xs opacity-75">
+                    {formatDateTime(message.timestamp)}
+                  </span>
+                  <button
+                    onClick={() => handleCopyMessage(message.text, message.id)}
+                    className={`p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity ${
+                      message.sender === 'user' ? 'hover:bg-blue-600' : 'hover:bg-gray-100'
+                    }`}
+                    title="複製訊息"
+                  >
+                    {copiedMessageId === message.id ? (
+                      <Check className="w-4 h-4" />
+                    ) : (
+                      <Copy className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           ))}
