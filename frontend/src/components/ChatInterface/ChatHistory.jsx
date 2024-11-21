@@ -2,6 +2,8 @@ import React from 'react';
 import { XMarkIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
 
 const ChatHistory = ({ historyMessages, setCurrentMessages, setShowHistory }) => {
+  const recentMessages = historyMessages.slice(-10);
+
   return (
     <div className="fixed right-0 top-0 h-full w-80 bg-white shadow-lg z-10 p-4 overflow-y-auto">
       <div className="flex justify-between items-center mb-4">
@@ -11,12 +13,13 @@ const ChatHistory = ({ historyMessages, setCurrentMessages, setShowHistory }) =>
         </button>
       </div>
       <div className="space-y-4">
-        {historyMessages.map((conversation) => (
+        {recentMessages.map((conversation) => (
           <div
             key={conversation.date}
             className="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100"
             onClick={() => {
-              const expandedMessages = conversation.messages.flatMap(msg => [
+              const limitedMessages = conversation.messages.slice(-10);
+              const expandedMessages = limitedMessages.flatMap(msg => [
                 msg.userMessage,
                 msg.assistantMessage
               ]);
