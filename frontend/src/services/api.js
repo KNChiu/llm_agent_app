@@ -14,9 +14,20 @@ export const chatService = {
   // 發送聊天訊息
   sendMessage: async (message, context = [], model = 'gpt-4o-mini', temperature = 0.7, maxTokens = 1000) => {
     try {
+      // 將對話歷史轉換為正確的格式
+      const formattedContext = context.reduce((acc, msg, index, array) => {
+        if (msg.sender === 'user') {
+          acc.push({
+            user_message: msg.text,
+            assistant_message: array[index + 1]?.sender === 'assistant' ? array[index + 1].text : ''
+          });
+        }
+        return acc;
+      }, []);
+
       const response = await apiClient.post('/chat', { 
         message,
-        context,
+        context: formattedContext,
         model,
         temperature,
         max_tokens: maxTokens
@@ -41,16 +52,22 @@ export const chatService = {
     }
   },
 
-  // 添加健康檢查方法
+  // 添加健康度檢查方法
   checkHealth: async () => {
     try {
       const response = await apiClient.get('/health');
-      return response.data;
+      return {
+        status: response.data.status === 'ok',
+        timestamp: response.data.timestamp
+      };
     } catch (error) {
       console.error('Health check failed:', error);
-      throw error;
+      return {
+        status: false,
+        timestamp: new Date().toISOString()
+      };
     }
-  },
+  }
 };
 
 // 錯誤處理中間件
