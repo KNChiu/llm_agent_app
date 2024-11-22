@@ -1,52 +1,57 @@
-import React from 'react';
-import { Send } from 'lucide-react';
+import React, { useState } from 'react';
+import FeatureMenu from './FeatureMenu';
 
-const InputArea = ({
+const InputArea = ({ 
   inputMessage,
   setInputMessage,
   isLoading,
-  selectedModel,
-  setSelectedModel,
-  models,
   onSendMessage,
-  onKeyPress
+  onKeyPress,
 }) => {
+  const [selectedFeature, setSelectedFeature] = useState(null);
+
+  const handleSelectMode = (feature) => {
+    setSelectedFeature(feature);
+  };
+
+  const handleSendMessage = () => {
+    onSendMessage(selectedFeature);
+  };
+
+  const handleKeyPress = (e) => {
+    if (onKeyPress) {
+      onKeyPress(e, selectedFeature);
+    }
+  };
+
   return (
-    <div className="bg-white border-t p-4">
+    <div className="p-4 border-t">
       <div className="max-w-4xl mx-auto">
-        <div className="flex gap-4">
-          <select
-            value={selectedModel}
-            onChange={(e) => setSelectedModel(e.target.value)}
-            className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-          >
-            {models?.map(model => (
-              <option key={model.id} value={model.id}>
-                {model.name}
-              </option>
-            ))}
-          </select>
-          <div className="flex-1 relative">
-            <textarea
+        <div className="flex items-center gap-2">
+          <FeatureMenu onSelectMode={handleSelectMode} />
+          <div className="flex flex-1 items-center border rounded-lg focus-within:ring-2 focus-within:ring-blue-500">
+            {selectedFeature?.icon && (
+              <div className={`p-2 m-1 rounded-md ${selectedFeature.colors.bg}`}>
+                <selectedFeature.icon className="w-5 h-5" />
+              </div>
+            )}
+            <input
+              type="text"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={onKeyPress}
-              placeholder="輸入訊息..."
-              className="w-full p-3 pr-12 rounded-lg border border-gray-300 focus:outline-none focus:border-blue-500 resize-none"
-              rows="1"
-              style={{ maxHeight: '150px' }}
+              onKeyPress={handleKeyPress}
+              placeholder={selectedFeature?.placeholder || "輸入訊息..."}
+              className="flex-1 p-2 focus:outline-none"
+              disabled={isLoading}
             />
           </div>
           <button
-            onClick={onSendMessage}
+            onClick={handleSendMessage}
             disabled={isLoading || !inputMessage.trim()}
-            className={`p-3 rounded-lg ${
-              isLoading || !inputMessage.trim()
-                ? 'bg-gray-300 cursor-not-allowed'
-                : 'bg-blue-500 hover:bg-blue-600'
-            } text-white`}
+            className={`px-4 py-2 text-white rounded-lg hover:opacity-90 disabled:bg-gray-400 transition-colors
+              ${selectedFeature ? selectedFeature.colors.button : 'bg-blue-500'}`}
           >
-            <Send className="w-5 h-5" />
+            {selectedFeature?.buttonText || '發送'}
           </button>
         </div>
       </div>

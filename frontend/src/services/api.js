@@ -12,9 +12,8 @@ const apiClient = axios.create({
 
 export const chatService = {
   // 發送聊天訊息
-  sendMessage: async (message, context = [], model = 'gpt-4o-mini', temperature = 0.7, maxTokens = 1000) => {
+  sendMessage: async (message, context = [], model = 'gpt-4-mini', temperature = 0.7, maxTokens = 1000, prompt = '') => {
     try {
-      // 將對話歷史轉換為正確的格式
       const formattedContext = context.reduce((acc, msg, index, array) => {
         if (msg.sender === 'user') {
           acc.push({
@@ -25,8 +24,10 @@ export const chatService = {
         return acc;
       }, []);
 
+      const finalMessage = prompt ? `${prompt}\n${message}` : message;
+      console.log(finalMessage);
       const response = await apiClient.post('/chat', { 
-        message,
+        message: finalMessage,
         context: formattedContext,
         model,
         temperature,

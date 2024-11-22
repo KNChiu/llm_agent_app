@@ -68,13 +68,14 @@ async def create_chat(chat: schemas.ChatRequest, db: Session = Depends(get_db)):
             timestamp=datetime.now()
         )
         
-        # 傳入所有參數
+        # 傳入所有參數，包括 prompt
         response = await call_openai_api(
             chat.message, 
             chat.model,
             chat.temperature,
             chat.max_tokens,
-            chat.context
+            chat.context,
+            chat.prompt  # 新增 prompt 參數
         )
         
         # 記錄 AI 回應
@@ -208,13 +209,22 @@ async def get_logs(
         logger.error(f"讀取日誌出錯: {str(e)}")
         raise HTTPException(status_code=500, detail="無法讀取日誌文件")
 
-async def call_openai_api(message: str, model: str = "gpt-4-mini", temperature: float = 0.7, max_tokens: int = 1000, context: list = []) -> str:
+async def call_openai_api(
+    message: str, 
+    model: str = "gpt-4-mini", 
+    temperature: float = 0.7, 
+    max_tokens: int = 1000, 
+    context: list = [],
+    prompt: str = ""  # 新增 prompt 參數
+) -> str:
     try:
-
         # 記錄用戶請求和上下文
-        logger.info(f"User: {message}")
+        final_message = f"{prompt}\n{message}" if prompt else message
+        logger.info(f"User: {final_message}")
         if context:
             logger.info(f"Context: {context}")
+        if prompt:
+            logger.info(f"Prompt: {prompt}")
 
         # 記錄參數
         logger.info(f"Params: model={model}, temperature={temperature}, max_tokens={max_tokens}")
@@ -228,8 +238,9 @@ async def call_openai_api(message: str, model: str = "gpt-4-mini", temperature: 
             if ctx.get("assistant_message"):
                 messages.append({"role": "assistant", "content": ctx["assistant_message"]})
         
-        # 添加當前消息
-        messages.append({"role": "user", "content": message})
+        # 添加當前消息，使用組合後的訊息
+        messages.append({"role": "user", "content": final_message})
+        
         response = await client.chat.completions.create(
             model=model,
             messages=messages,

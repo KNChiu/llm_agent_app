@@ -4,10 +4,11 @@ from datetime import datetime
 
 class ChatRequest(BaseModel):
     message: str
-    model: str = "gpt-4o-mini"
+    context: list = []
+    model: str = "gpt-4-mini"
     temperature: float = 0.7
     max_tokens: int = 1000
-    context: list = []
+    prompt: str = ""
 
 class ChatResponse(BaseModel):
     id: int

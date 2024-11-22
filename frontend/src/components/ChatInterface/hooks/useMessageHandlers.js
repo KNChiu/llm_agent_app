@@ -2,7 +2,7 @@ import { chatService } from '../../../services/api';
 import { COPY_TIMEOUT } from '../../../config/chat';
 
 export const useMessageHandlers = (chatState) => {
-  const handleSendMessage = async () => {
+  const handleSendMessage = async (selectedFeature = null) => {
     if (!chatState.inputMessage.trim() || chatState.isLoading) return;
 
     const userMessage = {
@@ -24,7 +24,8 @@ export const useMessageHandlers = (chatState) => {
         updatedMessages,
         chatState.selectedModel,
         chatState.temperature,
-        chatState.maxTokens
+        chatState.maxTokens,
+        selectedFeature?.prompt || ''
       );
 
       const assistantMessage = {
@@ -68,13 +69,11 @@ export const useMessageHandlers = (chatState) => {
 
   return {
     handleSendMessage,
-    handleKeyPress: (e) => {
+    handleKeyPress: (e, selectedFeature) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
-        handleSendMessage();
+        handleSendMessage(selectedFeature);
       }
-    },
-    handleCopyMessage,
-    handleCopyCode
+    }
   };
 }; 
