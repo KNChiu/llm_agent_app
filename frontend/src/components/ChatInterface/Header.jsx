@@ -14,7 +14,7 @@ const Header = ({
     <div className="bg-white shadow-sm p-4">
       <div className="max-w-4xl mx-auto flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <h1 className="text-xl font-semibold text-gray-800">LLM Agent</h1>
+          <h1 className="text-xl font-semibold text-gray-800">LLM Chatbot</h1>
           {backendStatus === 'offline' && (
             <div className="flex items-center text-red-500 text-sm">
               <AlertCircle className="w-4 h-4 mr-1" />
