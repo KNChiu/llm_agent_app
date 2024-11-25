@@ -74,6 +74,8 @@ export const useMessageHandlers = (chatState) => {
         e.preventDefault();
         handleSendMessage(selectedFeature);
       }
-    }
+    },
+    handleCopyMessage,
+    handleCopyCode
   };
 }; 
