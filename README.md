@@ -6,56 +6,67 @@
 
 ```
 .
-├── backend/               # 後端專案目錄
-│   ├── data/              # 數據存儲目錄
-│   │   └── chat.db        # SQLite 數據庫文件
-│   ├── tests/             # 測試目錄
-│   │   ├── conftest.py    # 測試配置文件
-│   │   └── test_main.py   # 主要測試文件
-│   ├── Dockerfile         # 後端 Docker 配置文件
-│   ├── database.py        # 數據庫配置
-│   ├── main.py            # 主應用程序入口
-│   ├── models.py          # 數據模型定義
-│   ├── schemas.py         # Pydantic 模型定義
-│   └── requirements.txt   # Python 依賴清單
+├── backend/                                        # 後端專案目錄
+│   ├── tests/                                      # 測試目錄
+│   │   ├── conftest.py                                 # 測試配置文件
+│   │   └── test_main.py                                # 主要測試文件
+│   ├── Dockerfile                                      # 後端 Docker 配置文件
+│   ├── database.py                                     # 數據庫配置
+│   ├── main.py                                         # 主應用程序入口
+│   ├── models.py                                       # 數據模型定義
+│   ├── schemas.py                                      # Pydantic 模型定義
+│   └── requirements.txt                                # Python 依賴清單
 │
-├── frontend/              # 前端專案目錄
-│   ├── src/               # 源代碼目錄
-│   │   ├── components/    # React 組件
-│   │   │   └── ChatInterface.jsx  # 聊天界面組件
-│   │   ├── services/      # 服務層
-│   │   │   └── api.js     # API 調用服務
-│   │   ├── index.css      # 全局樣式
-│   │   └── main.jsx       # React 入口文件
-│   ├── public/            # 靜態資源目錄
-│   ├── Dockerfile         # 前端 Docker 配置文件
-│   ├── index.html         # HTML 模板
-│   ├── package.json       # npm 配置文件
-│   ├── postcss.config.js  # PostCSS 配置
-│   ├── tailwind.config.js # Tailwind CSS 配置
-│   └── vite.config.js     # Vite 配置文件
+├── frontend/                                       # 前端專案目錄
+|   ├── Dockerfile                                      # 前端 Docker 配置文件
+|   ├── index.html                                      # HTML 模板
+|   ├── package.json                                    # npm 配置文件
+|   ├── postcss.config.js                               # PostCSS 配置
+|   ├── public/                                     # 靜態資源目錄
+|   |   └── chat-logo.svg                               # 標籤圖示
+|   ├── src/                                        # 程式碼目錄
+|   |   ├── App.jsx                                     # 主要的 App 元件
+|   |   ├── components/                             # 元件目錄
+|   |   |   ├── ChatInterface/                      # ChatInterface 元件目錄
+|   |   |   |   ├── ChatHistory.jsx                     # 聊天歷史元件
+|   |   |   |   ├── FeatureMenu.jsx                     # 功能選單元件
+|   |   |   |   ├── Header.jsx                          # 頁面頂部元件
+|   |   |   |   ├── hooks/                          # 自定義 Hooks 資料夾   
+|   |   |   |   |   ├── useBackendStatus.js             # 監控後端狀態的 Hook
+|   |   |   |   |   ├── useChatState.js                 # 管理聊天狀態的 Hook
+|   |   |   |   |   └── useMessageHandlers.js           # 處理訊息相關邏輯的 Hook
+|   |   |   |   ├── index.jsx                           # 主要的 ChatInterface 元件
+|   |   |   |   ├── InputArea.jsx                       # 輸入區域元件   
+|   |   |   |   ├── Message/                        # 聊天訊息相關元件
+|   |   |   |   |   ├── CodeBlock.jsx                   # 程式碼塊元件
+|   |   |   |   |   ├── index.jsx                       # Message 元件的入口
+|   |   |   |   |   └── MessageContent.jsx              # 訊息內容元件
+|   |   |   |   ├── MessageList.jsx                     # 訊息列表元件
+|   |   |   |   └── Settings.jsx                        # 設定元件
+|   |   |   └── ErrorBoundary.jsx                       # 錯誤相關元件
+|   |   ├── config/
+|   |   |   └── chat.js                                 # 聊天設定
+|   |   ├── contexts/
+|   |   |   └── ThemeContext.jsx                        # 主題上下文
+|   |   ├── index.css                                   # 全局樣式  
+|   |   ├── main.jsx                                    # 主要的 App 元件
+|   |   ├── services
+|   |   |   └── api.js                                  # API 服務
+|   |   ├── store
+|   |   |   └── index.js                                # 全局狀態管理
+|   |   ├── types
+|   |   |   └── chat.ts                                 # 類型定義
+|   |   └── utils   
+|   |       └── dateTime.js                             # 日期時間工具
+|   ├── tailwind.config.js                              # Tailwind CSS 配置
+|   └── vite.config.ts                                  # Vite 配置文件
 │
-├── docker-compose.yml     # Docker Compose 配置文件
-├── .env                   # 環境變數配置
-└── README.md              # 專案說明文件
+├── docker-compose.yml                                  # Docker Compose 配置文件
+├── .env                                                # 環境變數配置
+├── test.db                                             # 測試數據庫 
+└── README.md                                           # 專案說明文件
 ```
 
-## 主要目錄說明
-
-### 後端 (backend/)
-- `data/`: 存放 SQLite 數據庫文件
-- `tests/`: 包含所有測試用例
-- `database.py`: 數據庫連接和配置
-- `models.py`: SQLAlchemy 數據模型
-- `schemas.py`: Pydantic 數據驗證模型
-- `main.py`: FastAPI 應用程序入口
-
-### 前端 (frontend/)
-- `src/components/`: React 組件目錄
-- `src/services/`: API 服務和工具函數
-- `public/`: 靜態資源目錄
-- `src/main.jsx`: React 應用程序入口
-- `src/index.css`: 全局樣式定義
 
 ## 配置文件說明
 
@@ -88,6 +99,14 @@
 - SQLAlchemy
 - SQLite
 - OpenAI API
+
+### Design Pattern
+- SOLID 原則    
+    - 單一職責原則（Single Responsibility Principle，SRP）
+        - UI 狀態、功能和資料元件分離
+- 自定義 Hooks
+    - 業務邏輯(business logic)，外圍區塊元件（block components）
+
 
 ## 安裝說明
 
@@ -168,15 +187,15 @@ OPENAI_API_KEY=你的OpenAI API金鑰
 運行後端測試：
 ```bash
 cd backend
-pytest
+pytest tests/
 ```
 
 ### API 文檔
-啟動後端服務後，訪問 `http://localhost:8000/docs` 查看 API 文檔
+啟動後端服務後，訪問 `http://localhost:8000/docs` 查看 API 文件
 
 ## 注意事項
 
-- 確保 OpenAI API 金鑰可用
+- 確保 OpenAI API 可用
 - 預設使用 SQLite 數據庫，無需額外配置
 - 開發環境下前端預設監聽 5173 端口
 - 後端 API 預設監聽 8000 端口
