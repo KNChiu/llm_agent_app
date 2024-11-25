@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import FeatureMenu from './FeatureMenu';
+import FeatureMenu, { defaultFeatures } from './FeatureMenu';
 
 const InputArea = ({ 
   inputMessage,
@@ -8,7 +8,8 @@ const InputArea = ({
   onSendMessage,
   onKeyPress,
 }) => {
-  const [selectedFeature, setSelectedFeature] = useState(null);
+  const defaultFeature = defaultFeatures.find(f => f.mode === 'chat');
+  const [selectedFeature, setSelectedFeature] = useState(defaultFeature);
 
   const handleSelectMode = (feature) => {
     setSelectedFeature(feature);
@@ -28,13 +29,11 @@ const InputArea = ({
     <div className="p-4 border-t">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center gap-2">
-          <FeatureMenu onSelectMode={handleSelectMode} />
           <div className="flex flex-1 items-center border rounded-lg focus-within:ring-2 focus-within:ring-blue-500">
-            {selectedFeature?.icon && (
-              <div className={`p-2 m-1 rounded-md ${selectedFeature.colors.bg}`}>
-                <selectedFeature.icon className="w-5 h-5" />
-              </div>
-            )}
+            <FeatureMenu 
+              onSelectMode={handleSelectMode}
+              currentMode={selectedFeature.mode}
+            />      
             <input
               type="text"
               value={inputMessage}
