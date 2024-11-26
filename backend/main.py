@@ -1,17 +1,23 @@
 # main.py
-from fastapi import FastAPI, HTTPException, Depends
-from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
-from typing import List
+import os
 import models
 import schemas
+from typing import List
+
+from fastapi import FastAPI, HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware
+
+from datetime import datetime
+from sqlalchemy.orm import Session
 from database import SessionLocal, engine
-from datetime import datetime, timedelta
+
 import openai
-import os
-from dotenv import load_dotenv
-from openai import AsyncOpenAI
+from langchain_openai import ChatOpenAI
+from langchain.chains import LLMChain
+from langchain.prompts import PromptTemplate
+
 import logging
+from dotenv import load_dotenv
 
 # 載入環境變數
 load_dotenv()
@@ -21,8 +27,8 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="聊天 API",
-    description="這是一個使用 FastAPI 和 OpenAI 實現的聊天 API",
-    version="1.0.0"
+    description="這是一個使用 FastAPI 和 LangChain 實現的聊天 API",
+    version="1.1.0"
 )
 
 # 配置 CORS
@@ -229,28 +235,16 @@ async def call_openai_api(
         # 記錄參數
         logger.info(f"Params: model={model}, temperature={temperature}, max_tokens={max_tokens}")
 
-        client = AsyncOpenAI()
-        
-        # 構建消息歷史
-        messages = []
-        for ctx in context:
-            messages.append({"role": "user", "content": ctx["user_message"]})
-            if ctx.get("assistant_message"):
-                messages.append({"role": "assistant", "content": ctx["assistant_message"]})
-        
-        # 添加當前消息，使用組合後的訊息
-        messages.append({"role": "user", "content": final_message})
-        
-        response = await client.chat.completions.create(
-            model=model,
-            messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens
-        )
-        return response.choices[0].message.content
+        # 使用 Langchain 生成回應
+        llm = ChatOpenAI(model_name=model, temperature=temperature)
+        prompt_template = PromptTemplate(input_variables=["message"], template=final_message)
+        chain = LLMChain(llm=llm, prompt=prompt_template)
+
+        response = await chain.arun(message=final_message)
+        return response
     except Exception as e:
-        logger.error(f"OpenAI API error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Error calling OpenAI API")
+        logger.error(f"Langchain API error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error calling Langchain API")
 
 @app.get("/health")
 async def health_check():
@@ -262,4 +256,3 @@ async def health_check():
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
-    
