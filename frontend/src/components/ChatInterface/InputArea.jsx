@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import FeatureMenu, { defaultFeatures } from './FeatureMenu';
 
 const InputArea = ({ 
@@ -20,10 +20,24 @@ const InputArea = ({
   };
 
   const handleKeyPress = (e) => {
-    if (onKeyPress) {
-      onKeyPress(e, selectedFeature);
+    if (e.key === 'Enter' && e.ctrlKey) {
+      e.preventDefault();
+      handleSendMessage();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      setInputMessage(prevMessage => prevMessage + '\n');
     }
   };
+
+  const textareaRef = useRef(null);
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  }, [inputMessage]);
+
 
   return (
     <div className="p-4 border-t">
@@ -34,14 +48,20 @@ const InputArea = ({
               onSelectMode={handleSelectMode}
               currentMode={selectedFeature.mode}
             />      
-            <input
-              type="text"
+            <textarea
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyPress}
               placeholder={selectedFeature?.placeholder || "輸入訊息..."}
-              className="flex-1 p-2 focus:outline-none"
+              className="flex-1 p-2 focus:outline-none resize-none overflow-y-auto"
               disabled={isLoading}
+              rows="1"
+              ref={textareaRef}
+              style={{ 
+                minHeight: '40px', 
+                maxHeight: '200px',
+                lineHeight: '1.5',
+              }}
             />
           </div>
           <button
