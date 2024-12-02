@@ -10,6 +10,14 @@
 │   ├── tests/                                      # 測試目錄
 │   │   ├── conftest.py                                 # 測試配置文件
 │   │   └── test_main.py                                # 主要測試文件
+│   ├── routes/                                     # 各路由
+│   │   ├── chat_routes.py                              # /Chat LLM 對話相關
+│   │   ├── health_routes.py                            # 檢查存活
+│   │   ├── history_routes.py                           # 歷史對話紀錄查詢
+│   │   └── log_routes.py                               # 系統紀錄查詢
+│   ├── utils/                                      # 副程式
+│   │   ├── dependencies.py                             # 資料庫連結
+│   │   └── logging.py                                  # 系統紀錄管理
 │   ├── Dockerfile                                      # 後端 Docker 配置文件
 │   ├── database.py                                     # 數據庫配置
 │   ├── main.py                                         # 主應用程序入口
