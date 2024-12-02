@@ -25,7 +25,15 @@ const InputArea = ({
       handleSendMessage();
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      setInputMessage(prevMessage => prevMessage + '\n');
+      const cursorPosition = e.target.selectionStart;
+      const textBeforeCursor = inputMessage.slice(0, cursorPosition);
+      const textAfterCursor = inputMessage.slice(cursorPosition);
+      setInputMessage(textBeforeCursor + '\n' + textAfterCursor);
+      
+      // 設置新的光標位置
+      setTimeout(() => {
+        e.target.setSelectionRange(cursorPosition + 1, cursorPosition + 1);
+      }, 0);
     }
   };
 
