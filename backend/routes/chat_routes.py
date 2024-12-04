@@ -81,6 +81,13 @@ async def call_openai_api(
         messages = []
         system_message = SystemMessage(content=prompt)
         messages.append(system_message)
+
+        if prompt:
+            logger.info(f"Prompt: {prompt}")
+        if context:
+            logger.info(f"Context: {context}")
+        logger.info(f"User: {message}")
+        logger.info(f"Params: model={model}, temperature={temperature}, max_tokens={max_tokens}")
         
         ### Prepare the conversation history with user inputs and responses.
         for h in context:
@@ -97,24 +104,7 @@ async def call_openai_api(
             raise ValueError("Unexpected response format from LangChain.")
         
         return response
-        # # 記錄用戶請求和上下文
-        # final_message = f"{prompt}\n{message}" if prompt else message
-        # logger.info(f"User: {final_message}")
-        # if context:
-        #     logger.info(f"Context: {context}")
-        # if prompt:
-        #     logger.info(f"Prompt: {prompt}")
-
-        # # 記錄參數
-        # logger.info(f"Params: model={model}, temperature={temperature}, max_tokens={max_tokens}")
-
-        # # 使用 Langchain 生成回應
-        # llm = ChatOpenAI(model_name=model, temperature=temperature)
-        # prompt_template = PromptTemplate(input_variables=["message"], template=final_message)
-        # chain = LLMChain(llm=llm, prompt=prompt_template)
-
-        # response = await chain.arun(message=final_message)
-        # return response
+    
     except Exception as e:
         logger.error(f"Langchain API error: {str(e)}")
         raise HTTPException(status_code=500, detail="Error calling Langchain API")
