@@ -9,6 +9,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from langchain.chains import LLMChain
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
+from langchain.schema import HumanMessage, SystemMessage, AIMessage
 
 from utils.dependencies import get_db
 from utils.logging import setup_logging
@@ -77,24 +78,43 @@ async def call_openai_api(
     prompt: str = ""  # 新增 prompt 參數
 ) -> str:
     try:
-        # 記錄用戶請求和上下文
-        final_message = f"{prompt}\n{message}" if prompt else message
-        logger.info(f"User: {final_message}")
-        if context:
-            logger.info(f"Context: {context}")
-        if prompt:
-            logger.info(f"Prompt: {prompt}")
+        messages = []
+        system_message = SystemMessage(content=prompt)
+        messages.append(system_message)
+        
+        ### Prepare the conversation history with user inputs and responses.
+        for h in context:
+            messages.append(HumanMessage(content=h['user_message']))
+            if h['assistant_message'] and h['assistant_message'] != "":
+                messages.append(AIMessage(content=h['assistant_message']))
+        
+        llm = ChatOpenAI(model_name=model, temperature=temperature, max_tokens=max_tokens)
+        response = llm.invoke(messages).content
 
-        # 記錄參數
-        logger.info(f"Params: model={model}, temperature={temperature}, max_tokens={max_tokens}")
-
-        # 使用 Langchain 生成回應
-        llm = ChatOpenAI(model_name=model, temperature=temperature)
-        prompt_template = PromptTemplate(input_variables=["message"], template=final_message)
-        chain = LLMChain(llm=llm, prompt=prompt_template)
-
-        response = await chain.arun(message=final_message)
+        if isinstance(response, str):
+            response = response.strip()
+        else:
+            raise ValueError("Unexpected response format from LangChain.")
+        
         return response
+        # # 記錄用戶請求和上下文
+        # final_message = f"{prompt}\n{message}" if prompt else message
+        # logger.info(f"User: {final_message}")
+        # if context:
+        #     logger.info(f"Context: {context}")
+        # if prompt:
+        #     logger.info(f"Prompt: {prompt}")
+
+        # # 記錄參數
+        # logger.info(f"Params: model={model}, temperature={temperature}, max_tokens={max_tokens}")
+
+        # # 使用 Langchain 生成回應
+        # llm = ChatOpenAI(model_name=model, temperature=temperature)
+        # prompt_template = PromptTemplate(input_variables=["message"], template=final_message)
+        # chain = LLMChain(llm=llm, prompt=prompt_template)
+
+        # response = await chain.arun(message=final_message)
+        # return response
     except Exception as e:
         logger.error(f"Langchain API error: {str(e)}")
         raise HTTPException(status_code=500, detail="Error calling Langchain API")

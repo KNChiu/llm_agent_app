@@ -24,10 +24,9 @@ export const chatService = {
         return acc;
       }, []);
 
-      const finalMessage = prompt ? `${prompt}\n${message}` : message;
-      console.log(finalMessage);
       const response = await apiClient.post('/chat', { 
-        message: finalMessage,
+        prompt: prompt,
+        message: message,
         context: formattedContext,
         model,
         temperature,
