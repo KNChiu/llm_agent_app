@@ -2,14 +2,15 @@ import { chatService } from '../../../services/api';
 import { COPY_TIMEOUT } from '../../../config/chat';
 
 export const useMessageHandlers = (chatState) => {
-  const handleSendMessage = async (selectedFeature = null) => {
+  const handleSendMessage = async (selectedFeature = null, fileContent = '') => {
     if (!chatState.inputMessage.trim() || chatState.isLoading) return;
 
     const userMessage = {
       id: Date.now().toString(),
-      text: chatState.inputMessage.trim(),
+      text: fileContent ? `FileContent: ${fileContent}  \nTask: ${chatState.inputMessage.trim()}` : chatState.inputMessage.trim(),
       sender: 'user',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      fileContent,
     };
 
     const updatedMessages = [...chatState.currentMessages, userMessage];
