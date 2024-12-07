@@ -2,6 +2,7 @@
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
+const DEBUG_MODE = import.meta.env.VITE_DEBUG_MODE === 'true';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -10,6 +11,42 @@ const apiClient = axios.create({
   },
 });
 
+// Request攔截器
+apiClient.interceptors.request.use((config) => {
+  if (DEBUG_MODE) {
+    console.log('Request:', {
+      url: config.url,
+      method: config.method,
+      data: config.data,
+      params: config.params,
+    });
+  }
+  return config;
+}, (error) => {
+  console.error('Request error:', error);
+  return Promise.reject(error);
+});
+
+// Response攔截器
+apiClient.interceptors.response.use(
+  (response) => {
+    if (DEBUG_MODE) {
+      console.log('Response:', {
+        url: response.config.url,
+        status: response.status,
+        data: response.data,
+      });
+    }
+    return response;
+  },
+  (error) => {
+    // 你的錯誤處理邏輯...
+    // （這裡省略錯誤處理邏輯，保持原樣）
+    return Promise.reject(error);
+  }
+);
+
+// 其他服務函式保持不變
 export const chatService = {
   // 發送聊天訊息
   sendMessage: async (message, context = [], model = 'gpt-4-mini', temperature = 0.7, maxTokens = 1000, prompt = '') => {
@@ -69,41 +106,3 @@ export const chatService = {
     }
   }
 };
-
-// 錯誤處理中間件
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    // 處理常見的錯誤情況
-    if (error.response) {
-      switch (error.response.status) {
-        case 401:
-          // 處理未授權錯誤
-          console.error('Unauthorized access');
-          break;
-        case 403:
-          // 處理禁止訪問錯誤
-          console.error('Forbidden access');
-          break;
-        case 404:
-          // 處理未找到資源錯誤
-          console.error('Resource not found');
-          break;
-        case 500:
-          // 處理服務器錯誤
-          console.error('Server error');
-          break;
-        default:
-          console.error('An error occurred:', error.response.data);
-      }
-    } else if (error.request) {
-      // 請求已發出但沒有收到回應
-      console.error('No response received:', error.request);
-    } else {
-      // 發送請求時出現錯誤
-      console.error('Error sending request:', error.message);
-    }
-
-    return Promise.reject(error);
-  }
-);

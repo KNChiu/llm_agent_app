@@ -16,6 +16,7 @@ services:
       - ./frontend/postcss.config.js:/app/postcss.config.js
     environment:
       - VITE_API_URL=http://localhost:8000
+      - VITE_DEBUG_MODE=true
     depends_on:
       - backend
     restart: unless-stopped
