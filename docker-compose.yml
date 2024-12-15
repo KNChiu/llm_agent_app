@@ -31,8 +31,8 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/backend
-      - sqlite_data:/backend/data
+      - ./backend:/app
+      - sqlite_data:/app/data
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     restart: unless-stopped

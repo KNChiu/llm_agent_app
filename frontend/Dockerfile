@@ -9,12 +9,15 @@ COPY package*.json ./
 RUN npm config set registry https://registry.npmmirror.com/ && \
     npm install
 
-# 複製源代碼
+# 複製其餘檔案
 COPY . .
 
-# 添加健康檢查
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD wget --quiet --tries=1 --spider http://localhost:5173 || exit 1
+# 創建數據目錄 
+RUN mkdir -p /app/data
 
-EXPOSE 5173
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"] 
+# 修改 HEALTHCHECK 路徑
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl --fail http://localhost:8000/docs || exit 1
+
+EXPOSE 8000
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
