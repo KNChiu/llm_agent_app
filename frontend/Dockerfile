@@ -5,9 +5,7 @@ WORKDIR /app
 # 只複製依賴相關文件
 COPY package*.json ./
 
-# 設置淘寶鏡像並安裝依賴
-RUN npm config set registry https://registry.npmmirror.com/ && \
-    npm install
+RUN npm install
 
 # 複製其餘檔案
 COPY . .
@@ -17,7 +15,7 @@ RUN mkdir -p /app/data
 
 # 修改 HEALTHCHECK 路徑
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl --fail http://localhost:8000/docs || exit 1
+    CMD wget --quiet --tries=1 --spider http://localhost:5173 || exit 1
 
-EXPOSE 8000
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+EXPOSE 5173
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"] 
