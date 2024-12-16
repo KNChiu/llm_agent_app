@@ -49,13 +49,14 @@ apiClient.interceptors.response.use(
 // 其他服務函式保持不變
 export const chatService = {
   // 發送聊天訊息
-  sendMessage: async (message, context = [], model = 'gpt-4-mini', temperature = 0.7, maxTokens = 1000, prompt = '') => {
+  sendMessage: async (userMessage, context = [], model = 'gpt-4-mini', temperature = 0.7, maxTokens = 1000, prompt = '') => {
     try {
       const formattedContext = context.reduce((acc, msg, index, array) => {
         if (msg.sender === 'user') {
           acc.push({
             user_message: msg.text,
-            assistant_message: array[index + 1]?.sender === 'assistant' ? array[index + 1].text : ''
+            assistant_message: array[index + 1]?.sender === 'assistant' ? array[index + 1].text : '',
+            file_content: msg.fileContent || '' // 添加 fileContent
           });
         }
         return acc;
@@ -63,7 +64,8 @@ export const chatService = {
 
       const response = await apiClient.post('/chat', { 
         prompt: prompt,
-        message: message,
+        message: userMessage.text,
+        file_content: userMessage.fileContent || '',
         context: formattedContext,
         model,
         temperature,

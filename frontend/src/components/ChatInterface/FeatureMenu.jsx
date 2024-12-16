@@ -37,12 +37,12 @@ export const defaultFeatures = [
     text: '文件', 
     mode: 'summary',
     placeholder: '輸入要統整的內容...',
-    buttonText: '文件',
+    buttonText: '詢問',
     colors: {
       bg: 'text-green-500 bg-green-50',
       button: 'bg-green-500'
     },
-    prompt: '請幫我依據 "FileContent" 的內容回答 "Task" 的指令：'
+    prompt: '請幫我參考 "FileContent" 的內容回答'
   },
   { 
     icon: LanguageIcon, 

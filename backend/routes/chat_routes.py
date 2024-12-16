@@ -39,15 +39,15 @@ async def create_chat(chat: schemas.ChatRequest, db: Session = Depends(get_db)):
             user_message=chat.message,
             timestamp=datetime.now()
         )
-        
+
         # 傳入所有參數，包括 prompt
         response = await call_openai_api(
-            chat.message, 
+            chat.message,
             chat.model,
             chat.temperature,
             chat.max_tokens,
             chat.context,
-            chat.prompt  # 新增 prompt 參數
+            chat.prompt
         )
         
         # 記錄 AI 回應
@@ -90,11 +90,18 @@ async def call_openai_api(
         logger.info(f"Params: model={model}, temperature={temperature}, max_tokens={max_tokens}")
         
         ### Prepare the conversation history with user inputs and responses.
-        for h in context:
-            messages.append(HumanMessage(content=h['user_message']))
-            if h['assistant_message'] and h['assistant_message'] != "":
-                messages.append(AIMessage(content=h['assistant_message']))
-        
+        if len(context) == 0:
+            messages.append(HumanMessage(content=message))
+        else:
+            for h in context:
+                user_message = h['user_message']
+                if h.get('file_content'):
+                    user_message = f"FileContent:\n{h['file_content']}\n\nQuestion: {h['user_message']}"
+
+                messages.append(HumanMessage(content=user_message))
+                if h.get('assistant_message') and h['assistant_message'] != "":
+                    messages.append(AIMessage(content=h['assistant_message']))
+
         llm = ChatOpenAI(model_name=model, temperature=temperature, max_tokens=max_tokens)
         response = llm.invoke(messages).content
 

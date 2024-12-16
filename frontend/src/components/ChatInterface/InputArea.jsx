@@ -18,6 +18,7 @@ const InputArea = ({
 
   const handleSendMessage = () => {
     onSendMessage(selectedFeature, fileContent); // 傳入 fileContent
+    setFileContent(''); // 發送後清空 fileContent
   };
 
   const handleKeyPress = (e) => {

@@ -7,10 +7,10 @@ export const useMessageHandlers = (chatState) => {
 
     const userMessage = {
       id: Date.now().toString(),
-      text: fileContent ? `FileContent: ${fileContent}  \nTask: ${chatState.inputMessage.trim()}` : chatState.inputMessage.trim(),
+      text: chatState.inputMessage.trim(), // Only show user's question
       sender: 'user',
       timestamp: new Date().toISOString(),
-      fileContent,
+      fileContent, // Keep fileContent in the message object
     };
 
     const updatedMessages = [...chatState.currentMessages, userMessage];
@@ -20,8 +20,11 @@ export const useMessageHandlers = (chatState) => {
     chatState.setIsLoading(true);
 
     try {
+      console.log('messages', userMessage.text);
+      console.log('updatedMessages', updatedMessages);
+
       const response = await chatService.sendMessage(
-        userMessage.text,
+        userMessage,
         updatedMessages,
         chatState.selectedModel,
         chatState.temperature,
