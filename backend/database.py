@@ -2,18 +2,25 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
 import os
 
-# 確保 data 目錄存在
-os.makedirs("data", exist_ok=True)
+# 載入環境變數
+load_dotenv()
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-# 使用 SQLite
-SQLALCHEMY_DATABASE_URL = "sqlite:///data/chat.db"
+# 創建 SQLAlchemy 引擎
+engine = create_engine(DATABASE_URL)
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False}  # SQLite 需要這個參數
-)
+# 創建 SessionLocal 類
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+# 創建基礎類別
 Base = declarative_base()
+
+# 測試連接
+try:
+    with engine.connect() as connection:
+        print("Connection successful!")
+except Exception as e:
+    print(f"Failed to connect: {e}")

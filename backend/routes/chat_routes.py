@@ -3,6 +3,7 @@ import schemas
 import logging
 from database import engine
 from datetime import datetime
+import uuid
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, HTTPException, Depends
 
@@ -33,10 +34,12 @@ async def create_chat(chat: schemas.ChatRequest, db: Session = Depends(get_db)):
     - **message**: 使用者輸入的訊息
     - 返回: 包含 AI 回應的對話記錄
     """
-    try:        
+    try:
         # 創建對話歷史記錄
         db_chat = models.Chat(
+            id=uuid.uuid4(),
             user_message=chat.message,
+            assistant_message="",
             timestamp=datetime.now()
         )
 
