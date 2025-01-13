@@ -132,6 +132,11 @@ cd [專案目錄]
 docker-compose up -d
 ```
 
+4. 重新打包
+```bash
+docker-compose build --no-cache
+```
+
 ### 手動安裝
 
 #### 後端設置
