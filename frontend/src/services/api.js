@@ -79,8 +79,8 @@ export const chatService = {
     }
   },
 
-  // 獲取聊天歷史
-  getChatHistory: async (skip = 0, limit = 100) => {
+  // 獲取聊天歷史，預設返回最新的20條記錄
+  getChatHistory: async (skip = 0, limit = 20) => {
     try {
       const response = await apiClient.get('/history', {
         params: { skip, limit },
@@ -88,6 +88,17 @@ export const chatService = {
       return response.data;
     } catch (error) {
       console.error('Error fetching chat history:', error);
+      throw error;
+    }
+  },
+
+  // 獲取特定 session 的完整聊天記錄
+  getSessionChatHistory: async (sessionId) => {
+    try {
+      const response = await apiClient.get(`/history/session/${sessionId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching session chat history:', error);
       throw error;
     }
   },

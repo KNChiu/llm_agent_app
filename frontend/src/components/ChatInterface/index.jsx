@@ -28,9 +28,8 @@ const ChatInterface = () => {
       {chatState.showHistory && (
         <ChatHistory
           historyMessages={chatState.historyMessages}
-          setCurrentMessages={chatState.setCurrentMessages}
+          loadSessionChat={chatState.loadSessionChat}
           setShowHistory={chatState.setShowHistory}
-          fetchChatHistory={chatState.fetchChatHistory}
         />
       )}
 
@@ -71,4 +70,4 @@ const ChatInterface = () => {
   );
 };
 
-export default ChatInterface; 
+export default ChatInterface;

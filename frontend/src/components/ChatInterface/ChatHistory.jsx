@@ -1,8 +1,7 @@
 import React from 'react';
 import { XMarkIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
 
-const ChatHistory = ({ historyMessages, setCurrentMessages, setShowHistory }) => {
-  const recentMessages = historyMessages.slice(-10);
+const ChatHistory = ({ historyMessages, loadSessionChat, setShowHistory }) => {
 
   return (
     <div className="fixed right-0 top-0 h-full w-80 bg-white shadow-lg z-10 p-4 overflow-y-auto">
@@ -13,30 +12,21 @@ const ChatHistory = ({ historyMessages, setCurrentMessages, setShowHistory }) =>
         </button>
       </div>
       <div className="space-y-4">
-        {recentMessages.map((conversation) => (
+        {historyMessages.map((session) => (
           <div
-            key={conversation.date}
+            key={session.sessionId}
             className="p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100"
-            onClick={() => {
-              const limitedMessages = conversation.messages.slice(-10);
-              const expandedMessages = limitedMessages.flatMap(msg => [
-                msg.userMessage,
-                msg.assistantMessage
-              ]);
-              setCurrentMessages(expandedMessages);
-              setShowHistory(false);
-            }}
+            onClick={() => loadSessionChat(session.sessionId)}
           >
-            <div className="font-semibold mb-2">{conversation.date}</div>
-            <div className="flex gap-2">
-              <div className="flex-1 text-sm text-gray-600 truncate">
-                <ChatBubbleLeftIcon className="h-4 w-4 inline mr-1" />
-                {conversation.messages[0]?.userMessage.text || '空對話'}
+            <div className="flex justify-between items-center mb-2">
+              <div className="font-semibold">{session.date}</div>
+              <div className="text-xs text-gray-500">
+                {session.messages.length} 條對話
               </div>
-              <div className="flex-1 text-sm text-gray-600 truncate">
-                <ChatBubbleLeftIcon className="h-4 w-4 inline mr-1" />
-                {conversation.messages[0]?.assistantMessage.text || ''}
-              </div>
+            </div>
+            <div className="text-sm text-gray-600">
+              <ChatBubbleLeftIcon className="h-4 w-4 inline mr-1" />
+              <span className="line-clamp-2">{session.lastMessage || '空對話'}</span>
             </div>
           </div>
         ))}
@@ -45,4 +35,4 @@ const ChatHistory = ({ historyMessages, setCurrentMessages, setShowHistory }) =>
   );
 };
 
-export default ChatHistory; 
+export default ChatHistory;
