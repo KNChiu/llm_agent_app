@@ -19,14 +19,15 @@ const ChatHistory = ({ historyMessages, loadSessionChat, setShowHistory }) => {
             onClick={() => loadSessionChat(session.sessionId)}
           >
             <div className="flex justify-between items-center mb-2">
-              <div className="font-semibold">{session.date}</div>
-              <div className="text-xs text-gray-500">
-                {session.messages.length} 條對話
+            <div className="font-semibold">
+                {session.lastMessage && session.lastMessage.length > 30 
+                  ? `${session.lastMessage.substring(0, 30)}...` 
+                  : session.lastMessage || '空對話'}
               </div>
             </div>
-            <div className="text-sm text-gray-600">
+            <div className="flex items-center text-sm text-gray-600">
               <ChatBubbleLeftIcon className="h-4 w-4 inline mr-1" />
-              <span className="line-clamp-2">{session.lastMessage || '空對話'}</span>
+              <span className="line-clamp-2 flex-1 text-right">{session.date}</span>
             </div>
           </div>
         ))}
