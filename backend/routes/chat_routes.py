@@ -37,7 +37,8 @@ async def create_chat(chat: schemas.ChatRequest, db: Session = Depends(get_db)):
     try:
         # 創建對話歷史記錄
         db_chat = models.Chat(
-            id=uuid.uuid4(),
+            session_id=chat.session_id,
+            turn_id=uuid.uuid4(),
             user_message=chat.message,
             assistant_message="",
             timestamp=datetime.now()
@@ -63,7 +64,7 @@ async def create_chat(chat: schemas.ChatRequest, db: Session = Depends(get_db)):
         db.refresh(db_chat)
         
         return {
-            "id": db_chat.id,
+            "turn_id": db_chat.turn_id,
             "message": response,
             "timestamp": db_chat.timestamp
         }

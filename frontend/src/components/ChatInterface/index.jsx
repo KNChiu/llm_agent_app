@@ -3,7 +3,7 @@ import Header from './Header';
 import ChatHistory from './ChatHistory';
 import MessageList from './MessageList';
 import InputArea from './InputArea';
-import Settings from './Settings';
+import Settings from './Settings'; 
 import { useChatState } from './hooks/useChatState';
 import { useMessageHandlers } from './hooks/useMessageHandlers';
 import { useBackendStatus } from './hooks/useBackendStatus';
@@ -46,6 +46,7 @@ const ChatInterface = () => {
       <InputArea
         inputMessage={chatState.inputMessage}
         setInputMessage={chatState.setInputMessage}
+        sessionId={chatState.sessionId}
         selectedModel={chatState.selectedModel}
         setSelectedModel={chatState.setSelectedModel}
         isLoading={chatState.isLoading}

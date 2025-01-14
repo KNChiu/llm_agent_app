@@ -4,6 +4,7 @@ from datetime import datetime
 from uuid import UUID
 
 class ChatRequest(BaseModel):
+    session_id: UUID
     message: str
     context: list = []
     model: str = "gpt-4o-mini"
@@ -12,7 +13,7 @@ class ChatRequest(BaseModel):
     prompt: str = ""
 
 class ChatResponse(BaseModel):
-    id: UUID
+    turn_id: UUID
     message: str
     timestamp: datetime
 
@@ -20,7 +21,8 @@ class ChatResponse(BaseModel):
         from_attributes = True
 
 class ChatHistory(BaseModel):
-    id: UUID
+    session_id: UUID
+    turn_id: UUID
     user_message: str
     assistant_message: str
     timestamp: datetime

@@ -49,7 +49,7 @@ apiClient.interceptors.response.use(
 // 其他服務函式保持不變
 export const chatService = {
   // 發送聊天訊息
-  sendMessage: async (userMessage, context = [], model = 'gpt-4-mini', temperature = 0.7, maxTokens = 1000, prompt = '') => {
+  sendMessage: async (session_id, userMessage, context = [], model = 'gpt-4-mini', temperature = 0.7, maxTokens = 1000, prompt = '') => {
     try {
       const formattedContext = context.reduce((acc, msg, index, array) => {
         if (msg.sender === 'user') {
@@ -63,6 +63,7 @@ export const chatService = {
       }, []);
 
       const response = await apiClient.post('/chat', { 
+        session_id: session_id,
         prompt: prompt,
         message: userMessage.text,
         file_content: userMessage.fileContent || '',

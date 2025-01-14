@@ -24,6 +24,7 @@ export const useMessageHandlers = (chatState) => {
       console.log('updatedMessages', updatedMessages);
 
       const response = await chatService.sendMessage(
+        chatState.sessionId,
         userMessage,
         updatedMessages,
         chatState.selectedModel,
@@ -82,4 +83,4 @@ export const useMessageHandlers = (chatState) => {
     handleCopyMessage,
     handleCopyCode
   };
-}; 
+};

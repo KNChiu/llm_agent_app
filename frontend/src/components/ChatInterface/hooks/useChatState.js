@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { MODELS, DEFAULT_MODEL, DEFAULT_TEMPERATURE, DEFAULT_MAX_TOKENS } from '../../../config/chat';
 import { chatService } from '../../../services/api';
 
@@ -6,6 +7,7 @@ export const useChatState = () => {
   const [currentMessages, setCurrentMessages] = useState([]);
   const [historyMessages, setHistoryMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
+  const [sessionId, setSessionId] = useState(() => uuidv4());
   const [isLoading, setIsLoading] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [selectedModel, setSelectedModel] = useState(DEFAULT_MODEL);
@@ -54,6 +56,7 @@ export const useChatState = () => {
 
   const handleNewChat = () => {
     setCurrentMessages([]);
+    setSessionId(uuidv4()); // Generate new sessionId for new chat
   };
 
   return {
@@ -64,6 +67,8 @@ export const useChatState = () => {
     setHistoryMessages,
     inputMessage,
     setInputMessage,
+    sessionId, 
+    setSessionId,
     isLoading,
     setIsLoading,
     showHistory,
@@ -83,4 +88,4 @@ export const useChatState = () => {
     fetchChatHistory,
     handleNewChat,
   };
-}; 
+};
