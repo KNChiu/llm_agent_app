@@ -11,6 +11,7 @@ class ChatRequest(BaseModel):
     temperature: float = 0.7
     max_tokens: int = 1000
     prompt: str = ""
+    api_type: str = "openai"
 
 class ChatResponse(BaseModel):
     turn_id: UUID

@@ -1,5 +1,6 @@
 import React from 'react';
 import { X } from 'lucide-react';
+import { API_TYPES } from '../../config/chat';
 
 const Settings = ({
   selectedModel,
@@ -9,7 +10,9 @@ const Settings = ({
   maxTokens,
   setMaxTokens,
   models,
-  setShowSettings
+  setShowSettings,
+  apiType,
+  setApiType,
 }) => {
   return (
     <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg p-4 z-50">
@@ -27,6 +30,23 @@ const Settings = ({
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
+            API 類型
+          </label>
+          <select
+            value={apiType}
+            onChange={(e) => setApiType(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+          >
+            {API_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {type.charAt(0).toUpperCase() + type.slice(1)}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             語言模型
           </label>
           <select
@@ -34,11 +54,13 @@ const Settings = ({
             onChange={(e) => setSelectedModel(e.target.value)}
             className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
           >
-            {models.map(model => (
-              <option key={model.id} value={model.id}>
-                {model.name}
-              </option>
-            ))}
+            {models
+              .filter((model) => model.apiType === apiType)
+              .map((model) => (
+                <option key={model.id} value={model.id}>
+                  {model.name}
+                </option>
+              ))}
           </select>
         </div>
 
@@ -85,4 +107,4 @@ const Settings = ({
   );
 };
 
-export default Settings; 
+export default Settings;

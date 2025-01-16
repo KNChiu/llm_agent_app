@@ -3,7 +3,7 @@ import Header from './Header';
 import ChatHistory from './ChatHistory';
 import MessageList from './MessageList';
 import InputArea from './InputArea';
-import Settings from './Settings'; 
+import Settings from './Settings';
 import { useChatState } from './hooks/useChatState';
 import { useMessageHandlers } from './hooks/useMessageHandlers';
 import { useBackendStatus } from './hooks/useBackendStatus';
@@ -15,7 +15,7 @@ const ChatInterface = () => {
 
   return (
     <div className="flex flex-col h-[100dvh] bg-gray-100">
-      <Header 
+      <Header
         backendStatus={backendStatus}
         showHistory={chatState.showHistory}
         setShowHistory={chatState.setShowHistory}
@@ -24,7 +24,7 @@ const ChatInterface = () => {
         handleNewChat={chatState.handleNewChat}
         fetchChatHistory={chatState.fetchChatHistory}
       />
-      
+
       {chatState.showHistory && (
         <ChatHistory
           historyMessages={chatState.historyMessages}
@@ -52,6 +52,7 @@ const ChatInterface = () => {
         onSendMessage={messageHandlers.handleSendMessage}
         onKeyPress={messageHandlers.handleKeyPress}
         models={chatState.models}
+        apiType={chatState.apiType}
       />
 
       {chatState.showSettings && (
@@ -64,6 +65,8 @@ const ChatInterface = () => {
           setMaxTokens={chatState.setMaxTokens}
           models={chatState.models}
           setShowSettings={chatState.setShowSettings}
+          apiType={chatState.apiType}
+          setApiType={chatState.setApiType}
         />
       )}
     </div>

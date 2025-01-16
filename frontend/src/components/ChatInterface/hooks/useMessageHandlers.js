@@ -2,7 +2,7 @@ import { chatService } from '../../../services/api';
 import { COPY_TIMEOUT } from '../../../config/chat';
 
 export const useMessageHandlers = (chatState) => {
-  const handleSendMessage = async (selectedFeature = null, fileContent = '') => {
+  const handleSendMessage = async (selectedFeature = null, fileContent = '', apiType) => {
     if (!chatState.inputMessage.trim() || chatState.isLoading) return;
 
     const userMessage = {
@@ -14,7 +14,7 @@ export const useMessageHandlers = (chatState) => {
     };
 
     const updatedMessages = [...chatState.currentMessages, userMessage];
-    
+
     chatState.setCurrentMessages(updatedMessages);
     chatState.setInputMessage('');
     chatState.setIsLoading(true);
@@ -30,7 +30,8 @@ export const useMessageHandlers = (chatState) => {
         chatState.selectedModel,
         chatState.temperature,
         chatState.maxTokens,
-        selectedFeature?.prompt || ''
+        selectedFeature?.prompt || '',
+        apiType
       );
 
       const assistantMessage = {
@@ -40,7 +41,7 @@ export const useMessageHandlers = (chatState) => {
         timestamp: new Date().toISOString()
       };
 
-      chatState.setCurrentMessages(messages => [...messages, assistantMessage]);
+      chatState.setCurrentMessages((messages) => [...messages, assistantMessage]);
     } catch (error) {
       console.error('Error sending message:', error);
     } finally {
@@ -77,10 +78,10 @@ export const useMessageHandlers = (chatState) => {
     handleKeyPress: (e, selectedFeature) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
-        handleSendMessage(selectedFeature);
+        handleSendMessage(selectedFeature, '', chatState.apiType);
       }
     },
     handleCopyMessage,
-    handleCopyCode
+    handleCopyCode,
   };
 };
