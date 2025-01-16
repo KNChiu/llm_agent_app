@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react'; // 引入 useEffect
 import { X } from 'lucide-react';
 import { API_TYPES } from '../../config/chat';
 
@@ -14,6 +14,20 @@ const Settings = ({
   apiType,
   setApiType,
 }) => {
+  useEffect(() => {
+    // 當 apiType 改變時，自動選擇第一個符合條件的模型
+    const firstModelForApiType = models.find(model => model.apiType === apiType);
+    if (firstModelForApiType) {
+      setSelectedModel(firstModelForApiType.id);
+    } else {
+      setSelectedModel('');
+    }
+  }, [apiType, models, setSelectedModel]);
+
+  const handleApiTypeChange = (e) => {
+    setApiType(e.target.value);
+  };
+
   return (
     <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg p-4 z-50">
       <div className="flex justify-between items-center mb-4">
@@ -34,7 +48,7 @@ const Settings = ({
           </label>
           <select
             value={apiType}
-            onChange={(e) => setApiType(e.target.value)}
+            onChange={handleApiTypeChange} // 使用新的處理函數
             className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
           >
             {API_TYPES.map((type) => (
