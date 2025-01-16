@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'; // 引入 useEffect
 import { X } from 'lucide-react';
-import { API_TYPES } from '../../config/chat';
+import { API_TYPES, DEFAULT_API_TYPE } from '../../config/chat';
 
 const Settings = ({
   selectedModel,

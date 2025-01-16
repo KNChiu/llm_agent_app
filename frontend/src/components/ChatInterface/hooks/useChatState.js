@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { MODELS, DEFAULT_MODEL, DEFAULT_TEMPERATURE, DEFAULT_MAX_TOKENS } from '../../../config/chat';
+import { MODELS, DEFAULT_MODEL, DEFAULT_TEMPERATURE, DEFAULT_MAX_TOKENS, DEFAULT_API_TYPE } from '../../../config/chat';
 import { chatService } from '../../../services/api';
 
 export const useChatState = () => {
@@ -16,7 +16,7 @@ export const useChatState = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [copiedMessageId, setCopiedMessageId] = useState(null);
   const [copiedCodeIndex, setCopiedCodeIndex] = useState(null);
-  const [apiType, setApiType] = useState('openai'); // Default to OpenAI
+  const [apiType, setApiType] = useState(DEFAULT_API_TYPE);
 
   const fetchChatHistory = async () => {
     try {
