@@ -2,17 +2,18 @@
 
 This is a chatbot application powered by a large language model, offering a streamlined user interface for interacting with an AI assistant.
 
-✨ Features:
-🗨️ Conversational AI – Engaging and dynamic interactions
-🌐 Real-time Translation – Smooth multilingual communication
-📰 Article Summarization – Quick and concise content extraction
+✨ Features:  
+🗨️ Conversational AI – Engaging and dynamic interactions  
+🌐 Real-time Translation – Smooth multilingual communication  
+📰 Article Summarization – Quick and concise content extraction  
 
-🛠️ Tech Stack:
-💻 Frontend: React – Building an intuitive user interface
-⚙️ Backend: FastAPI – Designing an async API for efficiency
-🗄️ Database: PostgreSQL – Managing structured data
-🐳 Containerization: Docker – Ensuring a consistent environment
-☁️ Deployment: Render + Docker & Supabase + PostgreSQL – Exploring cloud-based solutions
+
+🛠️ Tech Stack:  
+💻 Frontend: React – Building an intuitive user interface  
+⚙️ Backend: FastAPI – Designing an async API for efficiency  
+🗄️ Database: PostgreSQL – Managing structured data  
+🐳 Containerization: Docker – Ensuring a consistent environment  
+☁️ Deployment: Render + Docker & Supabase + PostgreSQL – Exploring cloud-based solutions  
 
 ## Screenshot
 ### 自適應畫面
