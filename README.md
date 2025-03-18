@@ -2,8 +2,67 @@
 
 這是一個基於大型語言模型的聊天機器人應用，提供簡潔的使用者介面來與 AI 助手進行對話。
 
-## 專案結構說明
+## Screenshot
+### 自適應畫面
+- Computer
+![Computer screenshot](image/computer_screenshot.png)
 
+- Mobile
+![Mobile screenshot](image/mobile_screenshot.jpeg)
+
+- Setting
+![Setting](image/setting.png)
+
+- Task
+![Task](image/task.png)
+
+- Code block & Format
+![Code block](image/code_block.png)
+
+- History
+![History](image/history.png)
+
+## 配置文件說明
+### 後端配置
+- `requirements.txt`: Python 依賴包清單
+- `Dockerfile`: 後端容器化配置
+
+### 前端配置
+- `package.json`: npm 包管理和腳本配置
+- `vite.config.js`: Vite 開發服務器配置
+- `tailwind.config.js`: Tailwind CSS 框架配置
+- `postcss.config.js`: PostCSS 處理器配置
+- `Dockerfile`: 前端容器化配置
+
+### 根目錄配置
+- `docker-compose.yml`: 多容器應用編排配置
+- `.env`: 環境變數配置文件
+
+
+## 技術架構
+### 前端
+- React 18
+- Tailwind CSS
+- Vite
+- Axios
+
+### 後端
+- FastAPI
+- SQLAlchemy
+- SQLite
+- OpenAI API
+
+## 線上部屬方案
+### 伺服器
+- Render + Docker
+![Render](image/render.png)
+
+### 資料庫
+- Supabase + PostgreSQL(Free-8GB)
+![Supabase](image/Supabase.png)
+
+
+## 專案結構說明
 ```
 .
 ├── backend/                                        # 後端專案目錄
@@ -74,47 +133,6 @@
 ├── test.db                                             # 測試數據庫 
 └── README.md                                           # 專案說明文件
 ```
-
-
-## 配置文件說明
-
-### 後端配置
-- `requirements.txt`: Python 依賴包清單
-- `Dockerfile`: 後端容器化配置
-
-### 前端配置
-- `package.json`: npm 包管理和腳本配置
-- `vite.config.js`: Vite 開發服務器配置
-- `tailwind.config.js`: Tailwind CSS 框架配置
-- `postcss.config.js`: PostCSS 處理器配置
-- `Dockerfile`: 前端容器化配置
-
-### 根目錄配置
-- `docker-compose.yml`: 多容器應用編排配置
-- `.env`: 環境變數配置文件
-
-
-## 技術架構
-
-### 前端
-- React 18
-- Tailwind CSS
-- Vite
-- Axios
-
-### 後端
-- FastAPI
-- SQLAlchemy
-- SQLite
-- OpenAI API
-
-### Design Pattern
-- SOLID 原則    
-    - 單一職責原則（Single Responsibility Principle，SRP）
-        - UI 狀態、功能和資料元件分離
-- 自定義 Hooks
-    - 業務邏輯(business logic)，外圍區塊元件（block components）
-
 
 ## 安裝說明
 
