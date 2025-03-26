@@ -79,67 +79,64 @@ This is a chatbot application powered by a large language model, offering a stre
 ```
 .
 ├── backend/                                        # 後端專案目錄
-│   ├── tests/                                      # 測試目錄
-│   │   ├── conftest.py                                 # 測試配置文件
-│   │   └── test_main.py                                # 主要測試文件
+│   ├── database.py                                     # 數據庫配置
+│   ├── Dockerfile                                      # 後端 Docker 配置文件
+│   ├── main.py                                         # 主應用程序入口
+│   ├── models.py                                       # 數據模型定義
+│   ├── requirements.txt                                # Python 依賴清單
 │   ├── routes/                                     # 各路由
 │   │   ├── chat_routes.py                              # /Chat LLM 對話相關
 │   │   ├── health_routes.py                            # 檢查存活
 │   │   ├── history_routes.py                           # 歷史對話紀錄查詢
 │   │   └── log_routes.py                               # 系統紀錄查詢
+│   ├── tests/                                      # 測試目錄
+│   │   ├── conftest.py                                 # 測試配置文件
+│   │   └── test_main.py                                # 主要測試文件
 │   ├── utils/                                      # 副程式
 │   │   ├── dependencies.py                             # 資料庫連結
 │   │   └── logging.py                                  # 系統紀錄管理
-│   ├── Dockerfile                                      # 後端 Docker 配置文件
-│   ├── database.py                                     # 數據庫配置
-│   ├── main.py                                         # 主應用程序入口
-│   ├── models.py                                       # 數據模型定義
-│   ├── schemas.py                                      # Pydantic 模型定義
-│   └── requirements.txt                                # Python 依賴清單
 │
 ├── frontend/                                       # 前端專案目錄
-|   ├── Dockerfile                                      # 前端 Docker 配置文件
-|   ├── index.html                                      # HTML 模板
-|   ├── package.json                                    # npm 配置文件
-|   ├── postcss.config.js                               # PostCSS 配置
-|   ├── public/                                     # 靜態資源目錄
-|   |   └── chat-logo.svg                               # 標籤圖示
-|   ├── src/                                        # 程式碼目錄
-|   |   ├── App.jsx                                     # 主要的 App 元件
-|   |   ├── components/                             # 元件目錄
-|   |   |   ├── ChatInterface/                      # ChatInterface 元件目錄
-|   |   |   |   ├── ChatHistory.jsx                     # 聊天歷史元件
-|   |   |   |   ├── FeatureMenu.jsx                     # 功能選單元件
-|   |   |   |   ├── Header.jsx                          # 頁面頂部元件
-|   |   |   |   ├── hooks/                          # 自定義 Hooks 資料夾   
-|   |   |   |   |   ├── useBackendStatus.js             # 監控後端狀態的 Hook
-|   |   |   |   |   ├── useChatState.js                 # 管理聊天狀態的 Hook
-|   |   |   |   |   └── useMessageHandlers.js           # 處理訊息相關邏輯的 Hook
-|   |   |   |   ├── index.jsx                           # 主要的 ChatInterface 元件
-|   |   |   |   ├── InputArea.jsx                       # 輸入區域元件   
-|   |   |   |   ├── Message/                        # 聊天訊息相關元件
-|   |   |   |   |   ├── CodeBlock.jsx                   # 程式碼塊元件
-|   |   |   |   |   ├── index.jsx                       # Message 元件的入口
-|   |   |   |   |   └── MessageContent.jsx              # 訊息內容元件
-|   |   |   |   ├── MessageList.jsx                     # 訊息列表元件
-|   |   |   |   └── Settings.jsx                        # 設定元件
-|   |   |   └── ErrorBoundary.jsx                       # 錯誤相關元件
-|   |   ├── config/
-|   |   |   └── chat.js                                 # 聊天設定
-|   |   ├── contexts/
-|   |   |   └── ThemeContext.jsx                        # 主題上下文
-|   |   ├── index.css                                   # 全局樣式  
-|   |   ├── main.jsx                                    # 主要的 App 元件
-|   |   ├── services
-|   |   |   └── api.js                                  # API 服務
-|   |   ├── store
-|   |   |   └── index.js                                # 全局狀態管理
-|   |   ├── types
-|   |   |   └── chat.ts                                 # 類型定義
-|   |   └── utils   
-|   |       └── dateTime.js                             # 日期時間工具
-|   ├── tailwind.config.js                              # Tailwind CSS 配置
-|   └── vite.config.ts                                  # Vite 配置文件
+│   ├── Dockerfile                                      # 前端 Docker 配置文件
+│   ├── index.html                                      # HTML 模板
+│   ├── package.json                                    # npm 配置文件
+│   ├── postcss.config.js                               # PostCSS 配置
+│   ├── public/                                     # 靜態資源目錄
+│   │   └── chat-logo.svg                               # 標籤圖示
+│   ├── src/                                        # 程式碼目錄
+│   │   ├── App.jsx                                     # 主要的 App 元件
+│   │   ├── components/                             # 元件目錄
+│   │   │   ├── ChatInterface/                      # ChatInterface 元件目錄
+│   │   │   │   ├── ChatHistory.jsx                     # 聊天歷史元件
+│   │   │   │   ├── FeatureMenu.jsx                     # 功能選單元件
+│   │   │   │   ├── Header.jsx                          # 頁面頂部元件
+│   │   │   │   ├── hooks/                          # 自定義 Hooks 資料夾   
+│   │   │   │   │   ├── useBackendStatus.js             # 監控後端狀態的 Hook
+│   │   │   │   │   ├── useChatState.js                 # 管理聊天狀態的 Hook
+│   │   │   │   │   └── useMessageHandlers.js           # 處理訊息相關邏輯的 Hook
+│   │   │   │   ├── index.jsx                           # 主要的 ChatInterface 元件
+│   │   │   │   ├── InputArea.jsx                       # 輸入區域元件   
+│   │   │   │   ├── Message/                        # 聊天訊息相關元件
+│   │   │   │   │   ├── CodeBlock.jsx                   # 程式碼塊元件
+│   │   │   │   │   ├── index.jsx                       # Message 元件的入口
+│   │   │   │   │   └── MessageContent.jsx              # 訊息內容元件
+│   │   │   │   ├── MessageList.jsx                     # 訊息列表元件
+│   │   │   │   └── Settings.jsx                        # 設定元件
+│   │   │   └── ErrorBoundary.jsx                       # 錯誤相關元件
+│   │   ├── config/
+│   │   │   └── chat.js                                 # 聊天設定
+│   │   ├── contexts/
+│   │   │   └── ThemeContext.jsx                        # 主題上下文
+│   │   ├── index.css                                   # 全局樣式  
+│   │   ├── main.jsx                                    # 主要的 App 元件
+│   │   ├── services
+│   │   │   └── api.js                                  # API 服務
+│   │   ├── store
+│   │   │   └── index.js                                # 全局狀態管理
+│   │   ├── types
+│   │   │   └── chat.ts                                 # 類型定義
+│   │   └── utils   
+│   │       └── dateTime.js                             # 日期時間工具
 │
 ├── docker-compose.yml                                  # Docker Compose 配置文件
 ├── .env                                                # 環境變數配置
