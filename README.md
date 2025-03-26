@@ -177,15 +177,24 @@ cd backend
 ```
 
 2. 建立虛擬環境
+- venv
 ```bash
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
 venv\Scripts\activate     # Windows
 ```
+- uv
+```
+uv venv .venv
+source .venv/bin/activate  # Linux/macOS
+.venv\Scripts\activate     # Windows
+```
 
 3. 安裝依賴
 ```bash
-pip install -r requirements.txt
+pip install -r backend/requirements.txt
+# or
+uv pip install -r backend/requirements.txt
 ```
 
 4. 啟動服務
