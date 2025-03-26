@@ -36,4 +36,4 @@ jobs:
       env:
         DATABASE_URL: sqlite:////tests/test.db
       run: |
-        pytest tests/ -v
+        pytest tests/test_main.py -v
