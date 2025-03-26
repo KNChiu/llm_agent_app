@@ -1,7 +1,8 @@
-import pytest
-import requests
+from fastapi.testclient import TestClient
+from main import app
+
+client = TestClient(app)
 
 def test_health_endpoint():
-    url = "http://localhost:8000/health"
-    response = requests.get(url)
+    response = client.get("/health")
     assert response.status_code == 200
