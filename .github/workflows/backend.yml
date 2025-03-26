@@ -34,6 +34,6 @@ jobs:
     - name: Run Tests
       working-directory: ./backend
       env:
-        DATABASE_URL: sqlite:////tests/test.db
+        DATABASE_URL: sqlite:///./tests/test.db
       run: |
         python -m pytest tests/ -v
