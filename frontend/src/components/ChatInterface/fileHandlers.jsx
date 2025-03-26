@@ -1,4 +1,7 @@
-// import { Document, Page, pdfjs, getDocument } from 'react-pdf';
+import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
+
+// 設定 PDF.js 的 workerSrc
+GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 // 處理檔案變更的函式
 export const handleFileChange = async (e, handleSendMessage, setFileContent) => {
