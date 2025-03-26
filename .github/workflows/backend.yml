@@ -3,9 +3,9 @@ name: Backend CI/CD
 on:
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:
-  paths:
+    paths:
       - 'backend/**'
+  workflow_dispatch:
 
 jobs:
   build-and-test:
