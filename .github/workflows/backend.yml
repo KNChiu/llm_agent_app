@@ -6,11 +6,6 @@ on:
   workflow_dispatch:
   paths:
       - 'backend/**'
-  push:
-    branches: [ main, master ]
-    paths:
-      - 'backend/**'
-  workflow_dispatch:
 
 jobs:
   build-and-test:
