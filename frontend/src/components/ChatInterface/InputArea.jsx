@@ -100,7 +100,7 @@ const InputArea = ({
               <div className="px-2">
                 <input
                   type="file"
-                  accept=".pdf, .txt"
+                  accept=".pdf, .txt, .md, .xls, .xlsx"
                   onChange={(e) => {
                     handleFileChange(e, handleSendMessage, setFileContent);
                     if (e.target.files[0]) {
