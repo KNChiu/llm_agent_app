@@ -3,3 +3,4 @@
 .env
 *.log
 backend/data/
+frontend/node_modules
