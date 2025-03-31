@@ -339,7 +339,7 @@ class ChromaDBConnecter:
 
                 # 限制每個基礎文件收集的區塊數量不超過 n_chunks_per_doc
                 if len(documents[base_doc_id]['chunks']) >= n_chunks_per_doc:
-                    break
+                    continue
 
             # 第三步：重構文件內容並計算相關性
             reconstructed_docs = []
