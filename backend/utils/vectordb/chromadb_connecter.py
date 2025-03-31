@@ -3,6 +3,9 @@ import uuid
 from typing import List, Optional, Dict, Any
 import chromadb
 from chromadb.utils import embedding_functions
+from typing import List, Optional, Dict, Any, Union, Tuple
+import uuid
+import re
 
 
 class ChromaDBConnecter:
@@ -125,6 +128,97 @@ class ChromaDBConnecter:
 
         return chunks
 
+    def retrieve_similar_documents(
+        self,
+        collection_name: str,
+        query: str,
+        n_results: int = 5,
+        where: Optional[Dict[str, Any]] = None,
+        where_document: Optional[Dict[str, Any]] = None,
+        include: List[str] = ['metadatas', 'documents', 'distances']
+    ) -> Optional[Dict[str, Any]]:
+        try:
+            collection = self.client.get_collection(name=collection_name, embedding_function=self.embedding_function)
+            print(f"Querying collection '{collection_name}' for content similar to: '{query[:50]}...'")
+            results = collection.query(
+                query_texts=[query],
+                n_results=n_results,
+                where=where,
+                where_document=where_document,
+                include=include
+            )
+            print(f"Found {len(results['ids'][0])} similar documents")
+            return results
+        except Exception as e:
+            print(f"Error retrieving similar documents: {e}")
+            return None
+
+    def retrieve_and_reconstruct_documents(
+        self,
+        collection_name: str,
+        query: str,
+        n_chunks_per_doc: int = 5,
+        max_docs: int = 3,
+        where: Optional[Dict[str, Any]] = None
+    ) -> List[Dict[str, Any]]:
+        try:
+            results = self.retrieve_similar_documents(
+                collection_name=collection_name,
+                query=query,
+                n_results=n_chunks_per_doc * max_docs * 2,
+                where=where,
+                include=['metadatas', 'documents', 'distances']
+            )
+            if not results or not results['ids'][0]:
+                print("No similar chunks found")
+                return []
+
+            documents = {}
+            for i, doc_id in enumerate(results['ids'][0]):
+                metadata = results['metadatas'][0][i]
+                content = results['documents'][0][i]
+                distance = results['distances'][0][i]
+                base_doc_id = metadata.get('base_document_id')
+                if not base_doc_id:
+                    continue
+                if base_doc_id not in documents:
+                    documents[base_doc_id] = {
+                        'chunks': [],
+                        'metadata': {k: v for k, v in metadata.items()
+                                     if k not in ['chunk_index', 'total_chunks', 'base_document_id']},
+                        'total_chunks': metadata.get('total_chunks', 1),
+                        'distances': []
+                    }
+                documents[base_doc_id]['chunks'].append({
+                    'content': content,
+                    'index': metadata.get('chunk_index', 0),
+                    'distance': distance
+                })
+                documents[base_doc_id]['distances'].append(distance)
+
+                if len(documents[base_doc_id]['chunks']) >= n_chunks_per_doc:
+                    continue
+
+            reconstructed_docs = []
+            for doc_id, doc_info in documents.items():
+                doc_info['chunks'].sort(key=lambda x: x['index'])
+                reconstructed_content = '\n'.join([chunk['content'] for chunk in doc_info['chunks']])
+                avg_distance = sum(doc_info['distances']) / len(doc_info['distances']) if doc_info['distances'] else 1.0
+                relevance = 1.0 - min(avg_distance, 1.0)
+                reconstructed_docs.append({
+                    'document_id': doc_id,
+                    'content': reconstructed_content,
+                    'metadata': doc_info['metadata'],
+                    'relevance': relevance,
+                    'chunks_retrieved': len(doc_info['chunks']),
+                    'total_chunks': doc_info['total_chunks']
+                })
+            reconstructed_docs.sort(key=lambda x: x['relevance'], reverse=True)
+            return reconstructed_docs[:max_docs]
+        except Exception as e:
+            print(f"Error in retrieving and reconstructing documents: {e}")
+            return []
+
 if __name__ == "__main__":
     connecter = ChromaDBConnecter(path="./data/chromadb_data")
     collection_name = "example_collection"
@@ -153,5 +247,25 @@ if __name__ == "__main__":
             chunk_overlap=50,
             metadata={"source": "example", "type": "long_document"}
         )
-        results = connecter.get_documents(collection_name=collection_name)
-        print(results)
+
+        query = "文件分割是如何工作的？"
+        results = connecter.retrieve_similar_documents(
+            collection_name=collection_name,
+            query=query,
+            n_results=3
+        )
+        print("\nSimilar chunks:")
+        if results:
+            for i, doc in enumerate(results['documents'][0]):
+                print(f"{i+1}. {doc[:50]}... (Distance: {results['distances'][0][i]:.4f})")
+
+        reconstructed = connecter.retrieve_and_reconstruct_documents(
+            collection_name=collection_name,
+            query=query,
+            n_chunks_per_doc=3
+        )
+        print("\nReconstructed documents:")
+        for i, doc in enumerate(reconstructed):
+            print(f"\nDocument {i+1}: {doc['document_id']} (Relevance: {doc['relevance']:.4f})")
+            print(f"Metadata: {doc['metadata']}")
+            print(f"Content: {doc['content'][:150]}...")
