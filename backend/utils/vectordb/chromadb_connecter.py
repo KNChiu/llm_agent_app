@@ -158,6 +158,15 @@ class ChromaDBConnecter:
             bool: 如果文件成功分塊並添加到集合中，則返回 True。
                   如果在處理過程中發生任何錯誤（例如分塊或添加至數據庫時），則返回 False。
         """
+        if not isinstance(document, str) or not document:
+            print("Error: document must be a non-empty string.")
+            return False
+        if not isinstance(chunk_size, int) or chunk_size <= 0:
+            print("Error: chunk_size must be a positive integer.")
+            return False
+        if not isinstance(chunk_overlap, int) or chunk_overlap < 0:
+            print("Error: chunk_overlap must be a non-negative integer.")
+            return False
         try:
             base_id = document_id if document_id else str(uuid.uuid4())
             chunks = self._split_text_into_chunks(document, chunk_size, chunk_overlap)
@@ -330,7 +339,7 @@ class ChromaDBConnecter:
 
                 # 限制每個基礎文件收集的區塊數量不超過 n_chunks_per_doc
                 if len(documents[base_doc_id]['chunks']) >= n_chunks_per_doc:
-                    continue
+                    break
 
             # 第三步：重構文件內容並計算相關性
             reconstructed_docs = []
