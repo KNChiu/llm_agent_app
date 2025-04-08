@@ -4,10 +4,13 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 import os
+from utils.backend_logger import BackendLogger
+backend_logger = BackendLogger().logger
 
 # 載入環境變數
 load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
+db_type = DATABASE_URL.split("+")[0]
 
 # 創建 SQLAlchemy 引擎
 engine = create_engine(DATABASE_URL)
@@ -21,6 +24,6 @@ Base = declarative_base()
 # 測試連接
 try:
     with engine.connect() as connection:
-        print("Connection successful!")
+        backend_logger.info(f"Connection {db_type} successful!")
 except Exception as e:
-    print(f"Failed to connect: {e}")
+    backend_logger.error(f"Failed to connect  {db_type}: {e}")

@@ -16,6 +16,7 @@ from langchain.schema import HumanMessage, SystemMessage, AIMessage
 
 from utils.dependencies import get_db
 from utils.logging import setup_logging
+from utils.backend_logger import BackendLogger
 
 from dotenv import load_dotenv
 
@@ -24,6 +25,7 @@ models.Base.metadata.create_all(bind=engine)
 
 setup_logging()
 logger = logging.getLogger(__name__)
+backend_logger = BackendLogger().logger
 
 router = APIRouter()
 
@@ -72,6 +74,8 @@ async def create_chat(chat: schemas.ChatRequest, db: Session = Depends(get_db)):
         db.add(db_chat)
         db.commit()
         db.refresh(db_chat)
+
+        backend_logger.debug(f"session_id: {chat.session_id}, turn_id: {db_chat.turn_id}, api_type: {chat.api_type}, model: {chat.model}, temperature: {chat.temperature}, max_tokens: {chat.max_tokens}, user_message: {chat.message}, assistant_message: {response}")
 
         return {
             "turn_id": db_chat.turn_id,
