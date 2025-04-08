@@ -1,8 +1,13 @@
+import re
+import uuid
 import chromadb
 from chromadb.utils import embedding_functions
 from typing import List, Optional, Dict, Any, Union, Tuple
-import uuid
-import re
+from utils.logging import setup_logging
+from utils.backend_logger import BackendLogger
+
+logger = setup_logging()
+backend_logger = BackendLogger().logger
 
 
 class ChromaDBConnecter:
@@ -20,20 +25,19 @@ class ChromaDBConnecter:
             Exception: 如果在初始化 ChromaDB 客戶端或嵌入函數時發生錯誤。
         """
         try:
+            self.path = path
             self.embedding_function = embedding_functions.DefaultEmbeddingFunction()
             # self.embedding_function = embedding_functions.OpenAIEmbeddingFunction(api_key="YOUR_API_KEY", model_name="text-embedding-ada-002")
 
             if path:
-                print(f"Initializing persistent ChromaDB client at: {path}")
                 self.client = chromadb.PersistentClient(path=path)
             else:
-                print("Initializing in-memory ChromaDB client.")
                 self.client = chromadb.Client()
 
-            print(f"Using embedding model: {embedding_model_name}")
+            backend_logger.info(f"ChromaDB client initialized with embedding model: {embedding_model_name}")
 
         except Exception as e:
-            print(f"Error occurred while initializing ChromaDBConnecter: {e}")
+            backend_logger.error(f"Error occurred while initializing ChromaDBConnecter: {e}")
             raise
 
     def create_collection(self, name: str, metadata: Optional[Dict[str, Any]] = None) -> Optional[chromadb.Collection]:
@@ -50,16 +54,15 @@ class ChromaDBConnecter:
             Optional[chromadb.Collection]: 成功時返回 Collection 物件，失敗時返回 None。
         """
         try:
-            print(f"Attempting to create or retrieve collection: {name}")
             collection = self.client.get_or_create_collection(
                 name=name,
                 embedding_function=self.embedding_function,
                 metadata=metadata
             )
-            print(f"Successfully retrieved or created collection: {name}")
+            backend_logger.info(f"Successfully created collection at: {self.path}")
             return collection
         except Exception as e:
-            print(f"Error occurred while creating or retrieving collection '{name}': {e}")
+            backend_logger.error(f"Error occurred while creating or retrieving collection '{name}': {e}")
             return None
 
     def add_documents(self, collection_name: str, ids: List[str], documents: List[str], metadatas: Optional[List[Dict[str, Any]]] = None) -> bool:
@@ -77,16 +80,16 @@ class ChromaDBConnecter:
         """
         try:
             collection = self.client.get_collection(name=collection_name, embedding_function=self.embedding_function)
-            print(f"Adding {len(ids)} documents to collection '{collection_name}'...")
             collection.add(
                 ids=ids,
                 documents=documents,
                 metadatas=metadatas
             )
-            print("Documents added successfully.")
+
+            backend_logger.info(f"Adding {len(ids)} documents to collection '{collection_name}'...")
             return True
         except Exception as e:
-            print(f"Error occurred while adding documents to collection '{collection_name}': {e}")
+            backend_logger.error(f"Error occurred while adding documents to collection '{collection_name}': {e}")
             return False
 
     def get_documents(self, collection_name: str, ids: Optional[List[str]] = None, where: Optional[Dict[str, Any]] = None, where_document: Optional[Dict[str, Any]] = None, limit: Optional[int] = 5, offset: Optional[int] = None, include: List[str] = ['metadatas', 'documents']) -> Optional[Dict[str, Any]]:
@@ -111,7 +114,6 @@ class ChromaDBConnecter:
         """
         try:
             collection = self.client.get_collection(name=collection_name, embedding_function=self.embedding_function)
-            print(f"Reading documents from collection '{collection_name}'...")
             results = collection.get(
                 ids=ids,
                 where=where,
@@ -120,10 +122,10 @@ class ChromaDBConnecter:
                 offset=offset,
                 include=include
             )
-            print("Documents retrieved successfully.")
+            backend_logger.info("Documents retrieved successfully.")
             return results
         except Exception as e:
-            print(f"Error occurred while reading documents from collection '{collection_name}': {e}")
+            backend_logger.error(f"Error occurred while reading documents from collection '{collection_name}': {e}")
             return None
 
     def add_document_with_chunking(self, collection_name: str, document: str, document_id: str = None,
@@ -159,18 +161,18 @@ class ChromaDBConnecter:
                   如果在處理過程中發生任何錯誤（例如分塊或添加至數據庫時），則返回 False。
         """
         if not isinstance(document, str) or not document:
-            print("Error: document must be a non-empty string.")
+            backend_logger.error("Error: document must be a non-empty string.")
             return False
         if not isinstance(chunk_size, int) or chunk_size <= 0:
-            print("Error: chunk_size must be a positive integer.")
+            backend_logger.error("Error: chunk_size must be a positive integer.")
             return False
         if not isinstance(chunk_overlap, int) or chunk_overlap < 0:
-            print("Error: chunk_overlap must be a non-negative integer.")
+            backend_logger.error("Error: chunk_overlap must be a non-negative integer.")
             return False
         try:
             base_id = document_id if document_id else str(uuid.uuid4())
             chunks = self._split_text_into_chunks(document, chunk_size, chunk_overlap)
-            print(f"Split document into {len(chunks)} chunks")
+            backend_logger.info(f"Split document into {len(chunks)} chunks")
             ids = [f"{base_id}_chunk_{i}" for i in range(len(chunks))]
             if metadata is None:
                 metadata = {}
@@ -190,7 +192,7 @@ class ChromaDBConnecter:
                 metadatas=metadatas
             )
         except Exception as e:
-            print(f"Error in chunking and adding document: {e}")
+            backend_logger.error(f"Error in chunking and adding document: {e}")
             return False
 
     def _split_text_into_chunks(self, text: str, chunk_size: int = 1000, chunk_overlap: int = 200) -> List[str]:
@@ -246,7 +248,6 @@ class ChromaDBConnecter:
         """
         try:
             collection = self.client.get_collection(name=collection_name, embedding_function=self.embedding_function)
-            print(f"Querying collection '{collection_name}' for content similar to: '{query[:50]}...'")
             results = collection.query(
                 query_texts=[query],
                 n_results=n_results,
@@ -254,10 +255,10 @@ class ChromaDBConnecter:
                 where_document=where_document,
                 include=include
             )
-            print(f"Found {len(results['ids'][0])} similar documents")
+            backend_logger.info(f"Found {len(results['ids'][0])} similar documents")
             return results
         except Exception as e:
-            print(f"Error retrieving similar documents: {e}")
+            backend_logger.error(f"Error retrieving similar documents: {e}")
             return None
 
     def retrieve_and_reconstruct_documents(
@@ -304,7 +305,7 @@ class ChromaDBConnecter:
                 include=['metadatas', 'documents', 'distances']
             )
             if not results or not results['ids'][0]:
-                print("No similar chunks found")
+                backend_logger.warning("No similar chunks found")
                 return []
 
             # 第二步：按基礎文件 ID 將區塊分組
@@ -361,7 +362,7 @@ class ChromaDBConnecter:
             reconstructed_docs.sort(key=lambda x: x['relevance'], reverse=True)
             return reconstructed_docs[:max_docs]
         except Exception as e:
-            print(f"Error in retrieving and reconstructing documents: {e}")
+            backend_logger.error(f"Error in retrieving and reconstructing documents: {e}")
             return []
 
 if __name__ == "__main__":
