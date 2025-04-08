@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from utils.logging import setup_logging
-from routes import chat_routes, log_routes, health_routes, history_routes
+from routes import chat_routes, log_routes, health_routes, history_routes, vectordb_routes
 
 # 設置日誌
 setup_logging()
@@ -29,6 +29,7 @@ app.add_middleware(
 app.include_router(chat_routes.router, prefix="/chat", tags=["Chat"])
 app.include_router(log_routes.router, prefix="/logs", tags=["Logs"])
 app.include_router(history_routes.router, prefix="/history", tags=["History"])
+app.include_router(vectordb_routes.router, prefix="/vectordb", tags=["VectorDB"])
 app.include_router(health_routes.router, tags=["Health"])
 
 

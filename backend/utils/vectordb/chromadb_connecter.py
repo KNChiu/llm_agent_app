@@ -1,8 +1,10 @@
+import re
+import uuid
 import chromadb
 from chromadb.utils import embedding_functions
 from typing import List, Optional, Dict, Any, Union, Tuple
-import uuid
-import re
+from utils.logging import setup_logging
+logger = setup_logging()
 
 
 class ChromaDBConnecter:
@@ -20,6 +22,7 @@ class ChromaDBConnecter:
             Exception: 如果在初始化 ChromaDB 客戶端或嵌入函數時發生錯誤。
         """
         try:
+            self.path = path
             self.embedding_function = embedding_functions.DefaultEmbeddingFunction()
             # self.embedding_function = embedding_functions.OpenAIEmbeddingFunction(api_key="YOUR_API_KEY", model_name="text-embedding-ada-002")
 
@@ -50,13 +53,12 @@ class ChromaDBConnecter:
             Optional[chromadb.Collection]: 成功時返回 Collection 物件，失敗時返回 None。
         """
         try:
-            print(f"Attempting to create or retrieve collection: {name}")
             collection = self.client.get_or_create_collection(
                 name=name,
                 embedding_function=self.embedding_function,
                 metadata=metadata
             )
-            print(f"Successfully retrieved or created collection: {name}")
+            logger.info(f"Successfully created collection at: {self.path}")
             return collection
         except Exception as e:
             print(f"Error occurred while creating or retrieving collection '{name}': {e}")
