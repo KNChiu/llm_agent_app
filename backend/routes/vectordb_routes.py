@@ -1,5 +1,6 @@
 import os
 import uuid
+import shutil
 import hashlib
 from typing import List, Optional, Dict, Any, Union
 from fastapi import APIRouter, Query, HTTPException, status
@@ -151,4 +152,30 @@ async def retrieve_documents(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to retrieve documents: {str(e)}"
+        )
+    
+@router.delete("/delete")
+async def delete_collection(session_id: uuid.UUID):
+    """
+    刪除向量數據庫
+    """
+    try:
+        path = f"./data/chromadb_data/{session_id}"
+        if not os.path.exists(path):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"VectorDB not found for session: {session_id}"
+            )
+        
+        shutil.rmtree(path)
+        
+        backend_logger.info(f"Deleted VectorDB | session: {session_id}")
+        
+        return {"status": "success", "message": f"Deleted VectorDB for session: {session_id}"}
+    
+    except Exception as e:
+        backend_logger.error(f"Error deleting VectorDB: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete vector database: {str(e)}"
         )
