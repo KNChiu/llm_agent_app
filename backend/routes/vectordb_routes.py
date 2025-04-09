@@ -121,15 +121,13 @@ async def retrieve_documents(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Query text cannot be empty"
         )
-        
-    try:
-        path = f"./data/chromadb_data/{session_id}"
-        if not os.path.exists(path):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"VectorDB not found for session: {session_id}"
-            )
-            
+    path = f"./data/chromadb_data/{session_id}"
+    if not os.path.exists(path):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"VectorDB not found for session: {session_id}"
+        )
+    try:            
         connecter = ChromaDBConnecter(path)
         collection_name = "documents"
         
@@ -159,13 +157,13 @@ async def delete_collection(session_id: uuid.UUID):
     """
     刪除向量數據庫
     """
+    path = f"./data/chromadb_data/{session_id}"
+    if not os.path.exists(path):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"VectorDB not found for session: {session_id}"
+        )
     try:
-        path = f"./data/chromadb_data/{session_id}"
-        if not os.path.exists(path):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"VectorDB not found for session: {session_id}"
-            )
         
         shutil.rmtree(path)
         
