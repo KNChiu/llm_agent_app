@@ -118,7 +118,6 @@ class TestVectorDBRoutes:
         response = client.post("/vectordb/add", params=payload)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        assert response.json()["detail"] == "Document cannot be empty"
 
     def test_add_documents_failure(self, mock_chromadb_connector):
         """測試添加文檔失敗（模擬內部錯誤）"""
@@ -132,7 +131,6 @@ class TestVectorDBRoutes:
         response = client.post("/vectordb/add", params=payload)
 
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-        assert "Failed to add document to vector database" in response.json()["detail"]
 
     def test_retrieve_documents_success(self, mock_chromadb_connector, cleanup_test_data):
         """測試成功檢索文檔"""

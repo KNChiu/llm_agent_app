@@ -80,9 +80,10 @@ async def add_documents(session_id: uuid.UUID,
     添加數據到向量數據庫
     """
     if not document:
+        backend_logger.warning(f"Document cannot be empty for session: {session_id}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Document cannot be empty"
+            detail=f"Document cannot be empty for session: {session_id}"
         )
         
     try:
@@ -101,10 +102,10 @@ async def add_documents(session_id: uuid.UUID,
         return {"status": "success", "message": f"Add documents to VectorDB | session: {session_id} | document_id: {document_id} | chunk_size: {chunk_size} | chunk_overlap: {chunk_overlap}"}
 
     except Exception as e:
-        backend_logger.error(f"Error adding document to VectorDB: {e}")
+        backend_logger.error(f"Failed to add document to VectorDB: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to add document to vector database: {str(e)}"
+            detail=f"Failed to add document to VectorDB: {str(e)}"
         )
 
 @router.get("/retrieve")
@@ -117,12 +118,14 @@ async def retrieve_documents(
     從向量數據庫檢索與查詢相似的文檔
     """
     if not query:
+        backend_logger.warning(f"Query text cannot be empty for session: {session_id}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Query text cannot be empty"
+            detail=f"Query text cannot be empty for session: {session_id}"
         )
     path = f"./data/chromadb_data/{session_id}"
     if not os.path.exists(path):
+        backend_logger.warning(f"VectorDB not found for session: {session_id}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"VectorDB not found for session: {session_id}"
@@ -146,7 +149,7 @@ async def retrieve_documents(
         }
         
     except Exception as e:
-        backend_logger.error(f"Error retrieving documents: {e}")
+        backend_logger.error(f"Failed to retrieve documents: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to retrieve documents: {str(e)}"
@@ -159,6 +162,7 @@ async def delete_collection(session_id: uuid.UUID):
     """
     path = f"./data/chromadb_data/{session_id}"
     if not os.path.exists(path):
+        backend_logger.warning(f"VectorDB not found for session: {session_id}")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"VectorDB not found for session: {session_id}"
@@ -172,7 +176,7 @@ async def delete_collection(session_id: uuid.UUID):
         return {"status": "success", "message": f"Deleted VectorDB for session: {session_id}"}
     
     except Exception as e:
-        backend_logger.error(f"Error deleting VectorDB: {e}")
+        backend_logger.error(f"Failed to delete vector database: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to delete vector database: {str(e)}"
