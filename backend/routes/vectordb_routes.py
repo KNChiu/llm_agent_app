@@ -3,9 +3,14 @@ import uuid
 import shutil
 import hashlib
 from typing import List, Optional, Dict, Any, Union
-from fastapi import APIRouter, Query, HTTPException, status, Body
+from datetime import datetime, timezone, timedelta
+from fastapi import APIRouter, Query, HTTPException, status, Body, Depends
+from sqlalchemy.orm import Session
+from sqlalchemy import func
 from utils.vectordb.chromadb_connecter import ChromaDBConnecter
 from utils.backend_logger import BackendLogger
+from models import Chat
+from utils.dependencies import get_db
 
 router = APIRouter()
 backend_logger = BackendLogger().logger
@@ -182,4 +187,37 @@ async def delete_collection(session_id: uuid.UUID):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to delete vector database: {str(e)}"
+        )
+
+@router.delete("/cleanup_old_sessions")
+async def cleanup_old_sessions(db: Session = Depends(get_db)):
+    """
+    刪除超過5天的對話向量數據庫
+    """
+    cutoff_date = datetime.now(timezone.utc) - timedelta(days=5)
+    try:
+        # 查詢session_id，最新聊天時間早於cutoff_date
+        subquery = (
+            db.query(Chat.session_id, func.max(Chat.timestamp).label("last_timestamp"))
+            .group_by(Chat.session_id)
+            .subquery()
+        )
+        old_sessions = (
+            db.query(subquery.c.session_id)
+            .filter(subquery.c.last_timestamp < cutoff_date)
+            .all()
+        )
+        deleted_sessions = []
+        for (session_id,) in old_sessions:
+            path = f"./data/chromadb_data/{session_id}"
+            if os.path.exists(path):
+                shutil.rmtree(path)
+                deleted_sessions.append(str(session_id))
+                backend_logger.info(f"Deleted VectorDB for old session: {session_id}")
+        return {"status": "success", "deleted_sessions": deleted_sessions}
+    except Exception as e:
+        backend_logger.error(f"Failed to cleanup old sessions: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to cleanup old sessions: {str(e)}"
         )
