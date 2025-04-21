@@ -88,14 +88,13 @@ class TestVectorDBRoutes:
         mock_chromadb_connector.add_document_with_chunking.return_value = None  # 假設無回傳
         
         payload = {
-            "session_id": TEST_SESSION_ID,
             "document": "This is a test document.",
             "chunk_size": 500,
             "chunk_overlap": 100,
             "type": "txt"
         }
 
-        response = client.post("/vectordb/add", params=payload)
+        response = client.post(f"/vectordb/add?session_id={TEST_SESSION_ID}", json=payload)
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["status"] == "success"
@@ -111,11 +110,10 @@ class TestVectorDBRoutes:
     def test_add_documents_empty_document(self):
         """測試 document 為空字串的情況"""
         payload = {
-            "session_id": TEST_SESSION_ID,
             "document": "",  # 空字串
         }
 
-        response = client.post("/vectordb/add", params=payload)
+        response = client.post(f"/vectordb/add?session_id={TEST_SESSION_ID}", json=payload)
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -124,11 +122,10 @@ class TestVectorDBRoutes:
         mock_chromadb_connector.add_document_with_chunking.side_effect = Exception("Mock insert error")
 
         payload = {
-            "session_id": TEST_SESSION_ID,
             "document": "This is a test document.",
         }
 
-        response = client.post("/vectordb/add", params=payload)
+        response = client.post(f"/vectordb/add?session_id={TEST_SESSION_ID}", json=payload)
 
         assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
 

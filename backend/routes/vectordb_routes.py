@@ -3,7 +3,7 @@ import uuid
 import shutil
 import hashlib
 from typing import List, Optional, Dict, Any, Union
-from fastapi import APIRouter, Query, HTTPException, status
+from fastapi import APIRouter, Query, HTTPException, status, Body
 from utils.vectordb.chromadb_connecter import ChromaDBConnecter
 from utils.backend_logger import BackendLogger
 
@@ -70,12 +70,14 @@ async def init_vectordb(session_id: uuid.UUID):
         )
     
 @router.post("/add")
-async def add_documents(session_id: uuid.UUID, 
-                        document: str, 
-                        document_id: Optional[str] = None,
-                        chunk_size: int = 1000, 
-                        chunk_overlap: int = 200,
-                        type: str = "txt"):
+async def add_documents(
+    session_id: uuid.UUID,
+    document: str = Body(...), 
+    document_id: Optional[str] = Body(None),
+    chunk_size: int = Body(1000), 
+    chunk_overlap: int = Body(200),
+    type: str = Body("txt")
+):
     """
     添加數據到向量數據庫
     """
