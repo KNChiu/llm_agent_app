@@ -7,11 +7,13 @@ import Settings from './Settings';
 import { useChatState } from './hooks/useChatState';
 import { useMessageHandlers } from './hooks/useMessageHandlers';
 import { useBackendStatus } from './hooks/useBackendStatus';
+import { useVectorDB } from './hooks/useVectorDB'; // Import the new hook
 
 const ChatInterface = () => {
   const chatState = useChatState();
   const messageHandlers = useMessageHandlers(chatState);
   const backendStatus = useBackendStatus();
+  const vectorDB = useVectorDB(chatState.sessionId); // Instantiate the hook
 
   return (
     <div className="flex flex-col h-[100dvh] bg-gray-100">
@@ -40,6 +42,8 @@ const ChatInterface = () => {
         copiedCodeIndex={chatState.copiedCodeIndex}
         onCopyMessage={messageHandlers.handleCopyMessage}
         onCopyCode={messageHandlers.handleCopyCode}
+        retrievedDocs={vectorDB.retrievedDocs} // Pass retrieved docs
+        isVectorDBLoading={vectorDB.isVectorDBLoading} // Pass loading state
       />
 
       <InputArea
@@ -53,6 +57,10 @@ const ChatInterface = () => {
         onKeyPress={messageHandlers.handleKeyPress}
         models={chatState.models}
         apiType={chatState.apiType}
+        // Pass VectorDB handlers and loading state
+        onAddDocuments={vectorDB.handleAddDocuments}
+        onRetrieveDocuments={vectorDB.handleRetrieveDocuments}
+        isVectorDBLoading={vectorDB.isVectorDBLoading}
       />
 
       {chatState.showSettings && (

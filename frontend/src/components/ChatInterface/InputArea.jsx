@@ -5,9 +5,13 @@ import { handleFileChange } from './fileHandlers';
 const InputArea = ({
   inputMessage,
   setInputMessage,
-  isLoading,
+  isLoading, // General loading state from useChatState
   onSendMessage,
   apiType,
+  // VectorDB props
+  onAddDocuments,
+  onRetrieveDocuments,
+  isVectorDBLoading, // Specific loading state from useVectorDB
 }) => {
   const defaultFeature = defaultFeatures.find((f) => f.mode === 'chat');
   const [selectedFeature, setSelectedFeature] = useState(defaultFeature);
@@ -18,16 +22,42 @@ const InputArea = ({
     setSelectedFeature(feature);
   };
 
-  const handleSendMessage = () => {
-    onSendMessage(selectedFeature, fileContent, apiType); // 傳入 fileContent 和 apiType
-    setFileContent(''); // 發送後清空 fileContent
-    setFileName(''); // 發送後清空檔案名稱
+  // Determine if the overall UI should be disabled (either chat loading or VectorDB loading)
+  const isDisabled = isLoading || isVectorDBLoading;
+
+  const handleAction = async () => {
+    if (selectedFeature.mode === 'summary') {
+      if (fileContent) {
+        // Add document if file content exists
+        const success = await onAddDocuments(fileContent, fileName);
+        if (success) {
+          setFileContent('');
+          setFileName('');
+        }
+      } else if (inputMessage.trim()) {
+        // Retrieve documents if input message exists
+        const retrievedContent = await onRetrieveDocuments(inputMessage);
+  
+        await onSendMessage(selectedFeature, {
+          question: inputMessage,
+          documents: retrievedContent,
+        }, apiType);
+  
+        // Clear inputMessage after retrieval
+        setInputMessage('');
+      }
+    } else {
+      // 其他模式的預設傳送訊息
+      onSendMessage(selectedFeature, fileContent, apiType);
+      setFileContent('');
+      setFileName('');
+    }
   };
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && e.ctrlKey) {
       e.preventDefault();
-      handleSendMessage();
+      handleAction();
     } else if (e.key === 'Enter') {
       e.preventDefault();
       const cursorPosition = e.target.selectionStart;
@@ -85,7 +115,7 @@ const InputArea = ({
                 onKeyDown={handleKeyPress}
                 placeholder={selectedFeature?.placeholder || '輸入訊息...'}
                 className="w-full p-2 focus:outline-none resize-none overflow-y-auto"
-                disabled={isLoading}
+                disabled={isDisabled || (selectedFeature.mode === 'summary' && !!fileContent)} // Disable textarea if file is loaded in summary mode
                 rows="1"
                 ref={textareaRef}
                 style={{
@@ -102,17 +132,19 @@ const InputArea = ({
                   type="file"
                   accept=".pdf, .txt"
                   onChange={(e) => {
-                    handleFileChange(e, handleSendMessage, setFileContent);
+                    // Call handleFileChange with only event and setter
+                    handleFileChange(e, setFileContent);
                     if (e.target.files[0]) {
                       setFileName(e.target.files[0].name);
                     }
                   }}
                   className="hidden"
                   id="file-upload"
+                  disabled={isDisabled} // Disable file input when loading
                 />
                 <label
                   htmlFor="file-upload"
-                  className="cursor-pointer text-blue-500 hover:text-blue-600"
+                  className={`cursor-pointer text-blue-500 hover:text-blue-600 ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                   上傳檔案
                 </label>
@@ -121,12 +153,17 @@ const InputArea = ({
           </div>
 
           <button
-            onClick={handleSendMessage}
-            disabled={isLoading || (!inputMessage.trim() && !fileContent)}
+            onClick={handleAction} // Use the new handler
+            disabled={isDisabled || (selectedFeature.mode === 'summary' ? (!fileContent && !inputMessage.trim()) : (!inputMessage.trim() && !fileContent))}
             className={`px-4 py-2 text-white rounded-lg hover:opacity-90 disabled:bg-gray-400 transition-colors
               ${selectedFeature ? selectedFeature.colors.button : 'bg-blue-500'}`}
           >
-            {selectedFeature?.buttonText || '發送'}
+            {/* Dynamically change button text for summary mode */}
+            {selectedFeature.mode === 'summary'
+              ? fileContent
+                ? '加入知識庫' // Add to KB
+                : '知識庫檢索' // Retrieve from KB
+              : selectedFeature?.buttonText || '發送'}
           </button>
         </div>
       </div>

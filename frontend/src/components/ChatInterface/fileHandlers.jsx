@@ -1,7 +1,7 @@
 // import { Document, Page, pdfjs, getDocument } from 'react-pdf';
 
-// 處理檔案變更的函式
-export const handleFileChange = async (e, handleSendMessage, setFileContent) => {
+// 處理檔案變更的函式 - Updated signature
+export const handleFileChange = async (e, setFileContent) => {
   const file = e.target.files[0];
   if (file) {
     let fileText = '';

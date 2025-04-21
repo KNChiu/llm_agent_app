@@ -237,7 +237,7 @@ OPENAI_API_KEY=你的OpenAI API金鑰
 運行後端測試：
 ```bash
 cd backend
-pytest tests/
+python -m pytest tests/ -v
 ```
 
 ### API 文檔
