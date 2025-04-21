@@ -29,20 +29,25 @@ const InputArea = ({
     if (selectedFeature.mode === 'summary') {
       if (fileContent) {
         // Add document if file content exists
-        const success = await onAddDocuments(fileContent, fileName); // Await the result
-        if (success) { // Only clear if successful
+        const success = await onAddDocuments(fileContent, fileName);
+        if (success) {
           setFileContent('');
           setFileName('');
         }
       } else if (inputMessage.trim()) {
         // Retrieve documents if input message exists
-        // Retrieval doesn't need to clear input here unless desired
-        await onRetrieveDocuments(inputMessage); // Await retrieval
-        // Optionally clear inputMessage after retrieval?
-        // setInputMessage('');
+        const retrievedContent = await onRetrieveDocuments(inputMessage);
+  
+        await onSendMessage(selectedFeature, {
+          question: inputMessage,
+          documents: retrievedContent,
+        }, apiType);
+  
+        // Clear inputMessage after retrieval
+        setInputMessage('');
       }
     } else {
-      // Default send message action for other modes
+      // 其他模式的預設傳送訊息
       onSendMessage(selectedFeature, fileContent, apiType);
       setFileContent('');
       setFileName('');
@@ -52,7 +57,7 @@ const InputArea = ({
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && e.ctrlKey) {
       e.preventDefault();
-      handleSendMessage();
+      handleAction();
     } else if (e.key === 'Enter') {
       e.preventDefault();
       const cursorPosition = e.target.selectionStart;
