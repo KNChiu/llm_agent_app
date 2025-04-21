@@ -121,3 +121,65 @@ export const chatService = {
     }
   }
 };
+
+// VectorDB 服務函式
+export const vectorDBService = {
+  // 初始化 VectorDB
+  initVectorDB: async (session_id) => {
+    try {
+      const response = await apiClient.post('/vectordb/init', null, { // POST request with no body, params in URL
+        params: { session_id },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error initializing VectorDB:', error);
+      throw error;
+    }
+  },
+
+  // 添加文件到 VectorDB
+  addDocuments: async (session_id, document, document_id = null, chunk_size = 200, chunk_overlap = 50, type = "txt") => {
+    console.log("session_id:", session_id)
+    try {
+      const response = await apiClient.post('/vectordb/add', { // POST request with body
+        document,
+        document_id,
+        chunk_size,
+        chunk_overlap,
+        type
+      }, {
+        params: { session_id } // session_id as query parameter
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error adding documents to VectorDB:', error);
+      throw error;
+    }
+  },
+
+  // 從 VectorDB 檢索文件
+  retrieveDocuments: async (session_id, query, n_results = 5) => {
+    try {
+      const response = await apiClient.get('/vectordb/retrieve', {
+        params: { session_id, query, n_results },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error retrieving documents from VectorDB:', error);
+      throw error;
+    }
+  },
+
+  // 刪除 VectorDB 集合
+  deleteCollection: async (session_id) => {
+    try {
+      const response = await apiClient.delete('/vectordb/delete', {
+        params: { session_id },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting VectorDB collection:', error);
+      throw error;
+    }
+  }
+};
