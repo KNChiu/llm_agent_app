@@ -24,7 +24,7 @@ load_dotenv()
 models.Base.metadata.create_all(bind=engine)
 
 setup_logging()
-logger = logging.getLogger(__name__)
+logger = BackendLogger("chat_routes").logger
 backend_logger = BackendLogger().logger
 
 router = APIRouter()
@@ -54,16 +54,23 @@ async def create_chat(chat: schemas.ChatRequest, db: Session = Depends(get_db)):
                 chat.prompt,
                 chat.model  # 傳遞 model 參數
             )
-        else:
-            # 傳入所有參數，包括 prompt
+        elif chat.api_type == 'openai':
             response = await call_openai_api(
                 chat.message,
                 chat.model,
                 chat.temperature,
                 chat.max_tokens,
                 chat.context,
-                chat.prompt,
-                chat.api_type
+                chat.prompt
+            )
+        else:
+            response = await call_openrouter_api(
+                message=chat.message,
+                model=chat.model,
+                temperature=chat.temperature,
+                max_tokens=chat.max_tokens,
+                context=chat.context,
+                prompt=chat.prompt
             )
 
         # 記錄 AI 回應
@@ -94,58 +101,52 @@ else:
 
 async def call_openai_api(
     message: str,
-    model: str = "gpt-4-mini",
+    model: str,
     temperature: float = 0.7,
     max_tokens: int = 1000,
     context: list = [],
     prompt: str = "",  # 新增 prompt 參數
-    api_type: str = "openai",
 ) -> str:
     try:
-        if api_type == "openai":
-            messages = []
-            system_message = SystemMessage(content=prompt)
-            messages.append(system_message)
+        messages = []
+        system_message = SystemMessage(content=prompt)
+        messages.append(system_message)
 
-            if prompt:
-                logger.info(f"Prompt: {prompt}")
-            if context:
-                logger.info(f"Context: {context}")
-            logger.info(f"User: {message}")
-            logger.info(
-                f"Params: model={model}, temperature={temperature}, max_tokens={max_tokens}"
-            )
+        if prompt:
+            logger.info(f"Prompt: {prompt}")
+        if context:
+            logger.info(f"Context: {context}")
+        logger.info(f"User: {message}")
+        logger.info(
+            f"Params: model={model}, temperature={temperature}, max_tokens={max_tokens}"
+        )
 
-            ### Prepare the conversation history with user inputs and responses.
-            if len(context) == 0:
-                messages.append(HumanMessage(content=message))
-            else:
-                for h in context:
-                    user_message = h["user_message"]
-                    if h.get("file_content"):
-                        user_message = (
-                            f"FileContent:\n{h['file_content']}\n\nQuestion: {h['user_message']}"
-                        )
-
-                    messages.append(HumanMessage(content=user_message))
-                    if h.get("assistant_message") and h["assistant_message"] != "":
-                        messages.append(AIMessage(content=h["assistant_message"]))
-
-            llm = ChatOpenAI(
-                model_name=model, temperature=temperature, max_tokens=max_tokens
-            )
-            response = llm.invoke(messages).content
-
-            if isinstance(response, str):
-                response = response.strip()
-            else:
-                raise ValueError("Unexpected response format from LangChain.")
-
-            return response
-        elif api_type == "gemini":
-            return await call_gemini_api(message, context=context, prompt=prompt, model=model)
+        ### Prepare the conversation history with user inputs and responses.
+        if len(context) == 0:
+            messages.append(HumanMessage(content=message))
         else:
-            raise ValueError(f"Unsupported API type: {api_type}")
+            for h in context:
+                user_message = h["user_message"]
+                if h.get("file_content"):
+                    user_message = (
+                        f"FileContent:\n{h['file_content']}\n\nQuestion: {h['user_message']}"
+                    )
+
+                messages.append(HumanMessage(content=user_message))
+                if h.get("assistant_message") and h["assistant_message"] != "":
+                    messages.append(AIMessage(content=h["assistant_message"]))
+
+        llm = ChatOpenAI(
+            model_name=model, temperature=temperature, max_tokens=max_tokens
+        )
+        response = llm.invoke(messages).content
+
+        if isinstance(response, str):
+            response = response.strip()
+        else:
+            raise ValueError("Unexpected response format from LangChain.")
+
+        return response
 
     except Exception as e:
         logger.error(f"Langchain API error: {str(e)}")
@@ -187,4 +188,58 @@ async def call_gemini_api(
 
     except Exception as e:
         logger.error(f"Gemini API error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+async def call_openrouter_api(
+    message: str,
+    context: list = [],
+    prompt: str = "",
+    model: str = "deepseek/deepseek-chat-v3-0324:free",
+    temperature: float = 0.7,
+    max_tokens: int = 1000,
+) -> str:
+    try:
+
+        messages = []
+        if prompt:
+            messages.append({"role": "system", "content": prompt})
+            logger.info(f"Prompt: {prompt}")
+        
+        if context:
+            logger.info(f"Context: {context}")
+        logger.info(f"User: {message}")
+        logger.info(
+            f"Params: model={model}, temperature={temperature}, max_tokens={max_tokens}"
+        )
+
+        ### Prepare the conversation history with user inputs and responses.
+        if len(context) == 0:
+            messages.append(HumanMessage(content=message))
+        else:
+            for h in context:
+                user_message = h["user_message"]
+                if h.get("file_content"):
+                    user_message = (
+                        f"FileContent:\n{h['file_content']}\n\nQuestion: {h['user_message']}"
+                    )
+
+                messages.append(HumanMessage(content=user_message))
+                if h.get("assistant_message") and h["assistant_message"] != "":
+                    messages.append(AIMessage(content=h["assistant_message"]))
+
+        llm = ChatOpenAI(
+            model_name=model, temperature=temperature, max_tokens=max_tokens, base_url="https://openrouter.ai/api/v1",
+            api_key=os.getenv("OPENROUTER_API_KEY"),
+        )
+        response = llm.invoke(messages).content
+
+        if isinstance(response, str):
+            response = response.strip()
+        else:
+            raise ValueError("Unexpected response format from LangChain.")
+
+        return response
+
+    except Exception as e:
+        logger.error(f"OpenRouter API error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
