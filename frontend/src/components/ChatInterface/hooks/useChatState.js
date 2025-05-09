@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { MODELS, DEFAULT_MODEL, DEFAULT_TEMPERATURE, DEFAULT_MAX_TOKENS, DEFAULT_API_TYPE } from '../../../config/chat';
 import { chatService } from '../../../services/api';
@@ -17,15 +17,38 @@ export const useChatState = () => {
   const [copiedMessageId, setCopiedMessageId] = useState(null);
   const [copiedCodeIndex, setCopiedCodeIndex] = useState(null);
   const [apiType, setApiType] = useState(DEFAULT_API_TYPE);
+  
+  // 分頁相關狀態
+  const [historyPage, setHistoryPage] = useState(0);
+  const [hasMoreHistory, setHasMoreHistory] = useState(true);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
-  const fetchChatHistory = async () => {
+  // 使用 useCallback 優化函數
+  const fetchChatHistory = useCallback(async (page = 0, append = false) => {
+    // 已經在載入中，直接返回
+    if (isLoadingHistory) return;
+    
+    // 如果不是追加模式且已經沒有更多歷史記錄，直接返回
+    if (!append && !hasMoreHistory && historyMessages.length > 0) return;
+    
+    // 檢查是否請求相同頁面但已有數據，避免重複請求
+    if (page === historyPage && historyMessages.length > 0 && !append) return;
+    
     try {
-      const history = await chatService.getChatHistory();
-      // 直接使用後端返回的已排序和分組的數據
-      const formattedHistory = history.map((msg) => ({
+      setIsLoadingHistory(true);
+      const skip = page * 20;
+      const history = await chatService.getChatHistory(skip, 20);
+      
+      // 沒有數據，設置沒有更多記錄
+      if (history.items.length === 0) {
+        setHasMoreHistory(false);
+        return;
+      }
+
+      const formattedHistory = history.items.map((msg) => ({
         sessionId: msg.session_id,
         date: new Date(msg.timestamp).toLocaleDateString(),
-        lastMessage: msg.user_message, // 添加最後一條用戶訊息作為預覽
+        lastMessage: msg.user_message,
         message: {
           id: msg.turn_id,
           userMessage: {
@@ -43,30 +66,31 @@ export const useChatState = () => {
         },
       }));
 
-      // 按 session_id 分組
-      const groupedBySession = formattedHistory.reduce((acc, item) => {
-        if (!acc[item.sessionId]) {
-          acc[item.sessionId] = {
-            sessionId: item.sessionId,
-            date: item.date,
-            lastMessage: item.lastMessage,
-            messages: [],
-          };
-        }
-        acc[item.sessionId].messages.push(item.message);
-        return acc;
-      }, {});
-
-      // 轉換為陣列並按日期排序
-      const finalHistory = Object.values(groupedBySession).sort(
-        (a, b) => new Date(b.date) - new Date(a.date)
+      // 更新消息列表，追加或重置
+      setHistoryMessages(prev => 
+        append ? [...prev, ...formattedHistory] : formattedHistory
       );
-
-      setHistoryMessages(finalHistory);
+      
+      // 更新頁碼
+      setHistoryPage(page);
+      
+      // 根據 API 返回的 hasMore 更新本地狀態
+      setHasMoreHistory(history.hasMore);
     } catch (error) {
       console.error('Error fetching chat history:', error);
+    } finally {
+      setIsLoadingHistory(false);
     }
-  };
+  }, [isLoadingHistory, hasMoreHistory, historyMessages, historyPage, setHistoryMessages, setHistoryPage, setHasMoreHistory]);
+
+  // 載入更多歷史訊息
+  const loadMoreHistory = useCallback(() => {
+    // 確保有更多歷史記錄、不在載入狀態、且當前頁有數據
+    if (hasMoreHistory && !isLoadingHistory && historyMessages.length > 0) {
+      console.log('Loading more history, current page:', historyPage);
+      fetchChatHistory(historyPage + 1, true);
+    }
+  }, [fetchChatHistory, historyPage, hasMoreHistory, isLoadingHistory, historyMessages.length]);
 
   // 載入特定 session 的完整對話記錄
   const loadSessionChat = async (sessionId) => {
@@ -74,7 +98,6 @@ export const useChatState = () => {
       setIsLoading(true);
       const sessionHistory = await chatService.getSessionChatHistory(sessionId);
 
-      // 轉換為前端需要的格式
       const messages = sessionHistory
         .map((msg) => [
           {
@@ -104,7 +127,7 @@ export const useChatState = () => {
 
   const handleNewChat = () => {
     setCurrentMessages([]);
-    setSessionId(uuidv4()); // Generate new sessionId for new chat
+    setSessionId(uuidv4());
   };
 
   return {
@@ -138,5 +161,8 @@ export const useChatState = () => {
     loadSessionChat,
     apiType,
     setApiType,
+    loadMoreHistory,
+    isLoadingHistory,
+    hasMoreHistory,
   };
 };
