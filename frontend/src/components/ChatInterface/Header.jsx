@@ -10,6 +10,15 @@ const Header = ({
   handleNewChat = () => {},
   fetchChatHistory = () => {}
 }) => {
+  const handleHistoryClick = () => {
+    setShowHistory(!showHistory);
+    // 只有在開啟歷史記錄且尚未載入數據時才載入
+    if (!showHistory) {
+      // 可以讓 ChatInterface 中的 useEffect 自動處理載入邏輯
+      // 不在這裡直接調用 fetchChatHistory
+    }
+  };
+
   return (
     <div className="bg-white shadow-sm p-4">
       <div className="max-w-4xl mx-auto flex justify-between items-center">
@@ -32,12 +41,7 @@ const Header = ({
           </button>
           <button 
             className={`p-2 rounded-full ${showHistory ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
-            onClick={() => {
-              setShowHistory(!showHistory);
-              if (!showHistory) {
-                fetchChatHistory();
-              }
-            }}
+            onClick={handleHistoryClick}
           >
             <History className={`w-5 h-5 ${showHistory ? 'text-blue-600' : 'text-gray-600'}`} />
           </button>

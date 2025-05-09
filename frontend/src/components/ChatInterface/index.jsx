@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Header from './Header';
 import ChatHistory from './ChatHistory';
 import MessageList from './MessageList';
@@ -14,6 +14,14 @@ const ChatInterface = () => {
   const messageHandlers = useMessageHandlers(chatState);
   const backendStatus = useBackendStatus();
   const vectorDB = useVectorDB(chatState.sessionId); // Instantiate the hook
+
+  // 當 showHistory 變為 true 時，載入歷史記錄
+  useEffect(() => {
+    if (chatState.showHistory && chatState.historyMessages.length === 0) {
+      // 只有當顯示歷史記錄且尚未加載數據時才載入
+      chatState.fetchChatHistory(0, false);
+    }
+  }, [chatState.showHistory, chatState.fetchChatHistory, chatState.historyMessages.length]);
 
   return (
     <div className="flex flex-col h-[100dvh] bg-gray-100">
@@ -32,6 +40,9 @@ const ChatInterface = () => {
           historyMessages={chatState.historyMessages}
           loadSessionChat={chatState.loadSessionChat}
           setShowHistory={chatState.setShowHistory}
+          loadMoreHistory={chatState.loadMoreHistory}
+          isLoadingHistory={chatState.isLoadingHistory}
+          hasMoreHistory={chatState.hasMoreHistory}
         />
       )}
 

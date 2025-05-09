@@ -86,7 +86,13 @@ export const chatService = {
       const response = await apiClient.get('/history', {
         params: { skip, limit },
       });
-      return response.data;
+      return {
+        items: response.data.items,
+        total: response.data.total,
+        page: response.data.page,
+        limit: response.data.limit,
+        hasMore: response.data.has_more
+      };
     } catch (error) {
       console.error('Error fetching chat history:', error);
       throw error;
