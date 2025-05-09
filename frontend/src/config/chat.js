@@ -8,7 +8,7 @@ export const MODELS = [
 
 export const API_TYPES = ['openrouter', 'openai', 'gemini'];
 export const DEFAULT_API_TYPE = 'openrouter';
-export const DEFAULT_MODEL = 'deepseek/deepseek-r1:free';
+export const DEFAULT_MODEL = 'deepseek/deepseek-chat-v3-0324:free';
 export const DEFAULT_TEMPERATURE = 0.7;
 export const DEFAULT_MAX_TOKENS = 1000;
 export const COPY_TIMEOUT = 2000; // 複製提示顯示時間（毫秒）
