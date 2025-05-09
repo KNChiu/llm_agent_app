@@ -18,7 +18,7 @@ export const defaultFeatures = [
       bg: 'text-blue-500 bg-blue-50',
       button: 'bg-blue-500'
     },
-    prompt: '請以專業且友善的方式回答以下問題：'
+    prompt: '請以專業且友善通順的繁體中文臺灣用語回答以下問題：'
   },
   { 
     icon: MagnifyingGlassIcon, 
@@ -42,7 +42,7 @@ export const defaultFeatures = [
       bg: 'text-green-500 bg-green-50',
       button: 'bg-green-500'
     },
-    prompt: '請幫我參考 "FileContent" 的內容回答'
+    prompt: '請幫我參考 "FileContent" 的內容使用通順的繁體中文臺灣用語回答'
   },
   { 
     icon: LanguageIcon, 
