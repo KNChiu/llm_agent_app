@@ -5,9 +5,15 @@ import { handleFileChange } from './fileHandlers';
 const InputArea = ({
   inputMessage,
   setInputMessage,
+  sessionId,
+  selectedModel,
+  setSelectedModel,
   isLoading, // General loading state from useChatState
   onSendMessage,
+  onKeyPress,
+  models,
   apiType,
+  userId, // 添加 userId 參數
   // VectorDB props
   onAddDocuments,
   onRetrieveDocuments,
@@ -41,14 +47,14 @@ const InputArea = ({
         await onSendMessage(selectedFeature, {
           question: inputMessage,
           documents: retrievedContent,
-        }, apiType);
+        }, apiType, userId); // 傳遞 userId
   
         // Clear inputMessage after retrieval
         setInputMessage('');
       }
     } else {
       // 其他模式的預設傳送訊息
-      onSendMessage(selectedFeature, fileContent, apiType);
+      onSendMessage(selectedFeature, fileContent, apiType, userId); // 傳遞 userId
       setFileContent('');
       setFileName('');
     }

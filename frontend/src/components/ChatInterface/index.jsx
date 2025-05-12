@@ -9,8 +9,8 @@ import { useMessageHandlers } from './hooks/useMessageHandlers';
 import { useBackendStatus } from './hooks/useBackendStatus';
 import { useVectorDB } from './hooks/useVectorDB'; // Import the new hook
 
-const ChatInterface = () => {
-  const chatState = useChatState();
+const ChatInterface = ({ userId }) => {
+  const chatState = useChatState(userId);
   const messageHandlers = useMessageHandlers(chatState);
   const backendStatus = useBackendStatus();
   const vectorDB = useVectorDB(chatState.sessionId); // Instantiate the hook
@@ -74,6 +74,7 @@ const ChatInterface = () => {
         onKeyPress={messageHandlers.handleKeyPress}
         models={chatState.models}
         apiType={chatState.apiType}
+        userId={userId}
         // Pass VectorDB handlers and loading state
         onAddDocuments={vectorDB.handleAddDocuments}
         onRetrieveDocuments={vectorDB.handleRetrieveDocuments}
