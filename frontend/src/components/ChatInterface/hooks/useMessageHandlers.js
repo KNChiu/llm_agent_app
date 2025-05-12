@@ -31,7 +31,8 @@ export const useMessageHandlers = (chatState) => {
         chatState.temperature,
         chatState.maxTokens,
         selectedFeature?.prompt || '',
-        apiType
+        apiType,
+        chatState.currentUserId
       );
 
       const assistantMessage = {

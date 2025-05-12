@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from './Header';
 import ChatHistory from './ChatHistory';
 import MessageList from './MessageList';
@@ -14,14 +14,20 @@ const ChatInterface = () => {
   const messageHandlers = useMessageHandlers(chatState);
   const backendStatus = useBackendStatus();
   const vectorDB = useVectorDB(chatState.sessionId); // Instantiate the hook
+  const [hasTriedLoadHistory, setHasTriedLoadHistory] = useState(false);
 
-  // 當 showHistory 變為 true 時，載入歷史記錄
+  // 當 showHistory 變為 true 時，僅嘗試載入一次歷史記錄
   useEffect(() => {
-    if (chatState.showHistory && chatState.historyMessages.length === 0) {
-      // 只有當顯示歷史記錄且尚未加載數據時才載入
+    if (chatState.showHistory && !hasTriedLoadHistory) {
+      // 標記為已嘗試過載入歷史記錄
+      setHasTriedLoadHistory(true);
+      // 嘗試載入歷史記錄
       chatState.fetchChatHistory(0, false);
+    } else if (!chatState.showHistory && hasTriedLoadHistory) {
+      // 當關閉歷史記錄面板時，重置狀態
+      setHasTriedLoadHistory(false);
     }
-  }, [chatState.showHistory, chatState.fetchChatHistory, chatState.historyMessages.length]);
+  }, [chatState.showHistory, chatState.fetchChatHistory, hasTriedLoadHistory]);
 
   return (
     <div className="flex flex-col h-[100dvh] bg-gray-100">

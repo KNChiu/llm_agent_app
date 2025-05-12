@@ -11,6 +11,16 @@ const ChatHistory = ({
 }) => {
   const containerRef = useRef(null);
   const [isNearBottom, setIsNearBottom] = useState(false);
+  const [hasTriedInitialLoad, setHasTriedInitialLoad] = useState(false);
+
+  // 只在組件初次渲染時執行一次加載
+  useEffect(() => {
+    if (!hasTriedInitialLoad) {
+      setHasTriedInitialLoad(true);
+      // 觸發一次loadMoreHistory來檢查是否有數據
+      loadMoreHistory();
+    }
+  }, [hasTriedInitialLoad, loadMoreHistory]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -26,7 +36,7 @@ const ChatHistory = ({
         setIsNearBottom(nearBottom);
         
         // 只有當處於底部附近、有更多歷史記錄且不在載入狀態時才載入更多
-        if (nearBottom && hasMoreHistory && !isLoadingHistory) {
+        if (nearBottom && hasMoreHistory && !isLoadingHistory && historyMessages.length > 0) {
           loadMoreHistory();
         }
       }
@@ -34,7 +44,7 @@ const ChatHistory = ({
 
     container.addEventListener('scroll', handleScroll);
     return () => container.removeEventListener('scroll', handleScroll);
-  }, [loadMoreHistory, hasMoreHistory, isLoadingHistory, isNearBottom]);
+  }, [loadMoreHistory, hasMoreHistory, isLoadingHistory, isNearBottom, historyMessages.length]);
 
   return (
     <div className="fixed right-0 top-0 h-full w-80 bg-white shadow-lg z-10 flex flex-col">
@@ -51,7 +61,7 @@ const ChatHistory = ({
         ref={containerRef}
         className="flex-1 overflow-y-auto p-4 space-y-4"
       >
-        {historyMessages.length === 0 && !isLoadingHistory && (
+        {historyMessages.length === 0 && !isLoadingHistory && hasTriedInitialLoad && (
           <div className="text-center text-gray-500 py-8">
             沒有聊天記錄
           </div>
@@ -83,9 +93,15 @@ const ChatHistory = ({
           </div>
         )}
         
+        {!hasMoreHistory && historyMessages.length === 0 && hasTriedInitialLoad && !isLoadingHistory && (
+          <div className="text-center text-gray-500 text-sm py-4">
+            沒有聊天記錄
+          </div>
+        )}
+        
         {!hasMoreHistory && historyMessages.length > 0 && (
           <div className="text-center text-gray-500 text-sm py-4">
-            沒有更多記錄了
+            {historyMessages.length >= 100 ? "已達載入上限，僅顯示最近5頁記錄" : "沒有更多記錄了"}
           </div>
         )}
       </div>

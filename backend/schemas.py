@@ -12,6 +12,7 @@ class ChatRequest(BaseModel):
     max_tokens: int = 1000
     prompt: str = ""
     api_type: str = "openai"
+    user_id: UUID | None = None
 
 class ChatResponse(BaseModel):
     turn_id: UUID
@@ -25,6 +26,7 @@ class ChatResponse(BaseModel):
 class ChatHistory(BaseModel):
     session_id: UUID
     turn_id: UUID
+    user_id: UUID | None = None
     user_message: str
     assistant_message: str
     timestamp: datetime

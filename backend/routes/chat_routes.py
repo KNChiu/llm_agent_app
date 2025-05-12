@@ -35,6 +35,7 @@ async def create_chat(chat: schemas.ChatRequest, db: Session = Depends(get_db)):
     創建新的聊天對話
 
     - **message**: 使用者輸入的訊息
+    - **user_id**: 可選的用戶ID, 用於區分不同用戶的對話
     - 返回: 包含 AI 回應的對話記錄
     """
     try:
@@ -42,6 +43,7 @@ async def create_chat(chat: schemas.ChatRequest, db: Session = Depends(get_db)):
         db_chat = models.Chat(
             session_id=chat.session_id,
             turn_id=uuid.uuid4(),
+            user_id=chat.user_id,
             user_message=chat.message,
             assistant_message="",
             timestamp=datetime.now()
