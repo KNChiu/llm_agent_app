@@ -49,6 +49,9 @@ const ChatInterface = ({ userId }) => {
           loadMoreHistory={chatState.loadMoreHistory}
           isLoadingHistory={chatState.isLoadingHistory}
           hasMoreHistory={chatState.hasMoreHistory}
+          setCurrentUserId={chatState.setCurrentUserIdAndReload}
+          fetchChatHistory={chatState.fetchChatHistory}
+          currentUserId={chatState.currentUserId}
         />
       )}
 

@@ -7,11 +7,15 @@ const ChatHistory = ({
   setShowHistory,
   loadMoreHistory,
   isLoadingHistory,
-  hasMoreHistory 
+  hasMoreHistory,
+  setCurrentUserId = () => {},
+  fetchChatHistory = () => {},
+  currentUserId = null
 }) => {
   const containerRef = useRef(null);
   const [isNearBottom, setIsNearBottom] = useState(false);
   const [hasTriedInitialLoad, setHasTriedInitialLoad] = useState(false);
+  const [titleClickCount, setTitleClickCount] = useState(0);
 
   // 只在組件初次渲染時執行一次加載
   useEffect(() => {
@@ -46,11 +50,44 @@ const ChatHistory = ({
     return () => container.removeEventListener('scroll', handleScroll);
   }, [loadMoreHistory, hasMoreHistory, isLoadingHistory, isNearBottom, historyMessages.length]);
 
+  // 處理標題點擊
+  const handleTitleClick = () => {
+    const newClickCount = titleClickCount + 1;
+    setTitleClickCount(newClickCount);
+    
+    // 達到5次點擊時，清除用戶ID篩選
+    if (newClickCount >= 5) {
+      // 使用 setCurrentUserId 函數重置用戶 ID
+      setCurrentUserId(null);
+      
+      // 額外調用 fetchChatHistory 進行雙重保障，確保一定會重新載入
+      setTimeout(() => {
+        fetchChatHistory(0, false, true); // 使用 force = true 強制刷新
+      }, 200);
+      
+      console.log('已重置用戶ID篩選，現在顯示所有用戶的聊天記錄');
+    }
+  };
+
+  // 準備標題的提示文字
+  const titleStyle = {
+    cursor: 'pointer'
+  };
+
   return (
     <div className="fixed right-0 top-0 h-full w-80 bg-white shadow-lg z-10 flex flex-col">
       <div className="p-4 border-b">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold">聊天記錄</h2>
+          <h2 
+            className="text-xl font-bold" 
+            style={titleStyle} 
+            onClick={handleTitleClick}
+          >
+            聊天記錄
+            {currentUserId && titleClickCount > 2 && (
+              <span className="ml-2 text-xs text-blue-500">({titleClickCount}/5)</span>
+            )}
+          </h2>
           <button onClick={() => setShowHistory(false)}>
             <XMarkIcon className="h-6 w-6" />
           </button>
