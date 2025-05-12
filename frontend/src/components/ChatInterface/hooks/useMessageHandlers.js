@@ -2,8 +2,9 @@ import { chatService } from '../../../services/api';
 import { COPY_TIMEOUT } from '../../../config/chat';
 
 export const useMessageHandlers = (chatState) => {
-  const handleSendMessage = async (selectedFeature = null, fileContent = '', apiType) => {
-    if (!chatState.inputMessage.trim() || chatState.isLoading) return;
+  const handleSendMessage = async (selectedFeature = null, fileContent = '', apiType, userId = null) => {
+    if (!chatState.inputMessage.trim() && !fileContent) return;
+    if (chatState.isLoading) return;
 
     const userMessage = {
       id: Date.now().toString(),
@@ -23,6 +24,9 @@ export const useMessageHandlers = (chatState) => {
       console.log('messages', userMessage.text);
       console.log('updatedMessages', updatedMessages);
 
+      // 優先使用傳入的 userId，如果沒有則使用 chatState 中的 currentUserId
+      const userIdToUse = userId || chatState.currentUserId;
+
       const response = await chatService.sendMessage(
         chatState.sessionId,
         userMessage,
@@ -31,7 +35,8 @@ export const useMessageHandlers = (chatState) => {
         chatState.temperature,
         chatState.maxTokens,
         selectedFeature?.prompt || '',
-        apiType
+        apiType,
+        userIdToUse
       );
 
       const assistantMessage = {
@@ -78,7 +83,7 @@ export const useMessageHandlers = (chatState) => {
     handleKeyPress: (e, selectedFeature) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
-        handleSendMessage(selectedFeature, '', chatState.apiType);
+        handleSendMessage(selectedFeature, '', chatState.apiType, chatState.currentUserId);
       }
     },
     handleCopyMessage,

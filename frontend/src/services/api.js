@@ -49,7 +49,7 @@ apiClient.interceptors.response.use(
 // 其他服務函式保持不變
 export const chatService = {
   // 發送聊天訊息
-  sendMessage: async (session_id, userMessage, context = [], model = 'gpt-4-mini', temperature = 0.7, maxTokens = 1000, prompt = '', apiType = 'openai') => {
+  sendMessage: async (session_id, userMessage, context = [], model = 'gpt-4-mini', temperature = 0.7, maxTokens = 1000, prompt = '', apiType = 'openai', user_id = null) => {
     try {
       const formattedContext = context.reduce((acc, msg, index, array) => {
         if (msg.sender === 'user') {
@@ -71,7 +71,8 @@ export const chatService = {
         model,
         temperature,
         max_tokens: maxTokens,
-        api_type: apiType
+        api_type: apiType,
+        user_id: user_id
       });
       return response.data;
     } catch (error) {
@@ -81,16 +82,21 @@ export const chatService = {
   },
 
   // 獲取聊天歷史，預設返回最新的20條記錄
-  getChatHistory: async (skip = 0, limit = 20) => {
+  getChatHistory: async (skip = 0, limit = 20, user_id = null) => {
     try {
+      const params = { skip, limit };
+      if (user_id) params.user_id = user_id;
+      
       const response = await apiClient.get('/history', {
-        params: { skip, limit },
+        params: params,
       });
+      
+      // 確保正確返回 has_more 值，即使是空數組
       return {
-        items: response.data.items,
-        total: response.data.total,
-        page: response.data.page,
-        limit: response.data.limit,
+        items: response.data.items || [],
+        total: response.data.total || 0,
+        page: response.data.page || 0,
+        limit: response.data.limit || limit,
         hasMore: response.data.has_more
       };
     } catch (error) {
@@ -100,9 +106,14 @@ export const chatService = {
   },
 
   // 獲取特定 session 的完整聊天記錄
-  getSessionChatHistory: async (sessionId) => {
+  getSessionChatHistory: async (sessionId, user_id = null) => {
     try {
-      const response = await apiClient.get(`/history/session/${sessionId}`);
+      const params = {};
+      if (user_id) params.user_id = user_id;
+      
+      const response = await apiClient.get(`/history/session/${sessionId}`, {
+        params: params
+      });
       return response.data;
     } catch (error) {
       console.error('Error fetching session chat history:', error);
