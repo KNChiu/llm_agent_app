@@ -1,0 +1,15 @@
+name: Database Activity Scheduler
+
+on:
+  schedule:
+    - cron: "0 0 * * 0,3" # Runs every Sunday and Wednesday
+  workflow_dispatch:  # 允許手動觸發
+
+jobs:
+  ping-db-endpoint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send HTTP Request to DB Activity Endpoint
+        run: |
+          curl -X GET ${{ secrets.APP_URL }}/db-activity 
