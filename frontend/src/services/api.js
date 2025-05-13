@@ -48,7 +48,77 @@ apiClient.interceptors.response.use(
 
 // 其他服務函式保持不變
 export const chatService = {
-  // 發送聊天訊息
+  // 發送聊天訊息 (Streaming)
+  sendMessageStream: async (session_id, userMessage, context = [], model = 'gpt-4-mini', temperature = 0.7, maxTokens = 1000, prompt = '', apiType = 'openai', user_id = null, onChunk, onError, onComplete) => {
+    try {
+      const formattedContext = context.reduce((acc, msg, index, array) => {
+        if (msg.sender === 'user') {
+          acc.push({
+            user_message: msg.text,
+            assistant_message: array[index + 1]?.sender === 'assistant' ? array[index + 1].text : '',
+            file_content: msg.fileContent || ''
+          });
+        }
+        return acc;
+      }, []);
+
+      const endpoint = `${API_BASE_URL}/chat`; // Use API_BASE_URL
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add any other necessary headers, e.g., Authorization
+        },
+        body: JSON.stringify({
+          session_id: session_id,
+          prompt: prompt,
+          message: userMessage.text,
+          context: formattedContext,
+          model,
+          temperature,
+          max_tokens: maxTokens,
+          api_type: apiType,
+          user_id: user_id
+        })
+      });
+
+      if (!response.ok) {
+        // Handle HTTP errors (e.g., 4xx, 5xx)
+        const errorData = await response.json().catch(() => ({ detail: response.statusText }));
+        console.error('Error sending message (stream):', errorData);
+        if (onError) onError(new Error(errorData.detail || 'Failed to send message'));
+        return; // Stop further processing
+      }
+
+      if (!response.body) {
+        if (onError) onError(new Error('Response body is null'));
+        return;
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedResponse = '';
+
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          break;
+        }
+        const chunk = decoder.decode(value, { stream: true });
+        accumulatedResponse += chunk;
+        if (onChunk) onChunk(chunk); // Pass the raw chunk
+      }
+      
+      if (onComplete) onComplete(accumulatedResponse); // Pass the full response on completion
+
+    } catch (error) {
+      console.error('Error sending message (stream):', error);
+      if (onError) onError(error);
+    }
+  },
+
+  // 發送聊天訊息 (Original - Non-streaming)
   sendMessage: async (session_id, userMessage, context = [], model = 'gpt-4-mini', temperature = 0.7, maxTokens = 1000, prompt = '', apiType = 'openai', user_id = null) => {
     try {
       const formattedContext = context.reduce((acc, msg, index, array) => {
