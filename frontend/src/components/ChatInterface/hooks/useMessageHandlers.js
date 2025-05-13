@@ -7,51 +7,88 @@ export const useMessageHandlers = (chatState) => {
     if (chatState.isLoading) return;
 
     const userMessage = {
-      id: Date.now().toString(),
-      text: chatState.inputMessage.trim(), // Only show user's question
+      id: Date.now().toString(), // Unique ID for user message
+      text: chatState.inputMessage.trim(),
       sender: 'user',
       timestamp: new Date().toISOString(),
-      fileContent, // Keep fileContent in the message object
+      fileContent,
     };
 
-    const updatedMessages = [...chatState.currentMessages, userMessage];
+    // Add user message and an initial empty assistant message for streaming
+    const assistantMessageId = `${Date.now()}-assistant`;
+    const initialAssistantMessage = {
+      id: assistantMessageId,
+      text: '', // Start with empty text
+      sender: 'assistant',
+      timestamp: new Date().toISOString(), // Timestamp will be when streaming starts
+    };
 
-    chatState.setCurrentMessages(updatedMessages);
+    // Update messages: add user message first, then the placeholder for assistant message
+    chatState.setCurrentMessages((prevMessages) => [
+      ...prevMessages,
+      userMessage,
+      initialAssistantMessage
+    ]);
+    
     chatState.setInputMessage('');
     chatState.setIsLoading(true);
 
     try {
-      console.log('messages', userMessage.text);
-      console.log('updatedMessages', updatedMessages);
-
-      // 優先使用傳入的 userId，如果沒有則使用 chatState 中的 currentUserId
       const userIdToUse = userId || chatState.currentUserId;
-
-      const response = await chatService.sendMessage(
+      
+      // Call the streaming service method
+      await chatService.sendMessageStream(
         chatState.sessionId,
-        userMessage,
-        updatedMessages,
+        userMessage, // Pass the userMessage object, service will extract text
+        chatState.currentMessages, // Pass current history for context
         chatState.selectedModel,
         chatState.temperature,
         chatState.maxTokens,
         selectedFeature?.prompt || '',
         apiType,
-        userIdToUse
+        userIdToUse,
+        (chunk) => { // onChunk callback
+          chatState.setCurrentMessages((prevMessages) =>
+            prevMessages.map((msg) =>
+              msg.id === assistantMessageId
+                ? { ...msg, text: msg.text + chunk }
+                : msg
+            )
+          );
+        },
+        (error) => { // onError callback
+          console.error('Streaming error:', error);
+          chatState.setCurrentMessages((prevMessages) =>
+            prevMessages.map((msg) =>
+              msg.id === assistantMessageId
+                ? { ...msg, text: msg.text + `\nError: ${error.message}` } // Append error to the message
+                : msg
+            )
+          );
+          chatState.setIsLoading(false);
+        },
+        (fullResponse) => { // onComplete callback
+          // Optional: if you need to do something with the full response after streaming
+          console.log('Streaming complete. Full response:', fullResponse);
+          chatState.setIsLoading(false);
+          // The message text is already updated by onChunk.
+          // If backend saves and returns a final timestamp or turn_id, update here.
+        }
       );
 
-      const assistantMessage = {
-        id: `${Date.now()}-assistant`,
-        text: response.message,
-        sender: 'assistant',
-        timestamp: new Date().toISOString()
-      };
-
-      chatState.setCurrentMessages((messages) => [...messages, assistantMessage]);
     } catch (error) {
-      console.error('Error sending message:', error);
-    } finally {
-      chatState.setIsLoading(false);
+      // This catch block might be redundant if sendMessageStream handles all its errors via onError
+      console.error('Error in handleSendMessage after calling sendMessageStream:', error);
+      chatState.setCurrentMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg.id === assistantMessageId
+            ? { ...msg, text: msg.text + `\nError: Failed to send message` }
+            : msg
+        )
+      );
+      chatState.setIsLoading(false); 
     }
+    // setLoading(false) is now handled by onComplete or onError in sendMessageStream
   };
 
   const handleCopyMessage = async (text, messageId) => {
