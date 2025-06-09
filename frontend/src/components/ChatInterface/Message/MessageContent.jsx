@@ -17,10 +17,22 @@ const MessageContent = ({ text, copiedCodeIndex, onCopyCode }) => {
     const match = /language-(\w+)/.exec(className || '');
     const language = match ? match[1] : 'plaintext';
     
+    // Extract code content
+    const code = hastToString(node);
+    
+    // Enhanced inline detection - check multiple conditions
+    // Prioritize inline for short code without language specification
+    const hasLanguageClass = className && className.includes('language-') && className !== 'language-plaintext';
+    const isShortCode = code.trim().length < 100;
+    const hasNoNewlines = !code.includes('\n');
+    
+    const isInlineCode = inline || 
+                        (hasNoNewlines && !hasLanguageClass) || 
+                        (isShortCode && hasNoNewlines && !hasLanguageClass);
+    
+    
     // For block code (not inline)
-    if (!inline) {
-      // Extract raw code string from the AST node
-      const code = hastToString(node);
+    if (!isInlineCode && code.trim().length > 0) {
       const currentIndex = codeBlockIndexRef.current++;
       
       return (
