@@ -1,28 +1,40 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
+import { toString as hastToString } from 'hast-util-to-string';
 import CodeBlock from './CodeBlock';
 
 const MessageContent = ({ text, copiedCodeIndex, onCopyCode }) => {
+  // Use ref to maintain code block index counter across renders
+  const codeBlockIndexRef = useRef(0);
+  
+  // Reset counter for each render
+  codeBlockIndexRef.current = 0;
+
   // Custom code component to use our existing CodeBlock
   const customCode = ({ node, inline, className, children, ...props }) => {
     const match = /language-(\w+)/.exec(className || '');
-    const language = match ? match[1] : '';
-    const code = String(children).replace(/\n$/, '');
+    const language = match ? match[1] : 'plaintext';
     
-    if (!inline && match) {
+    // For block code (not inline)
+    if (!inline) {
+      // Extract raw code string from the AST node
+      const code = hastToString(node);
+      const currentIndex = codeBlockIndexRef.current++;
+      
       return (
         <CodeBlock
           code={code}
           language={language}
-          index={0}
+          index={currentIndex}
           copiedCodeIndex={copiedCodeIndex}
           onCopyCode={onCopyCode}
         />
       );
     }
     
+    // For inline code, render as before
     return (
       <code className={`${className} bg-blue-50 text-blue-800 px-1 py-0.5 rounded text-sm font-mono`} {...props}>
         {children}

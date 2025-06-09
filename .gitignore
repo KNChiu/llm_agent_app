@@ -6,3 +6,4 @@ backend/data/
 frontend/node_modules
 backend/logs/
 mcp_data/
+package-lock.json
