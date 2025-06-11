@@ -21,6 +21,26 @@ const Message = ({
             : 'bg-white text-gray-800 shadow'
         }`}
       >
+        {/* 顯示圖片 - 只在用戶訊息中顯示 */}
+        {isUser && message.images && message.images.length > 0 && (
+          <div className="mb-3">
+            <div className="grid grid-cols-2 gap-2 max-w-sm">
+              {message.images.map((image, index) => (
+                <div key={index} className="relative group">
+                  <img
+                    src={image.preview || image.base64}
+                    alt={image.name}
+                    className="w-full h-24 object-cover rounded border border-white/20"
+                  />
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-xs p-1 rounded-b truncate">
+                    {image.name}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <MessageContent 
           text={message.text} 
           copiedCodeIndex={copiedCodeIndex}
@@ -49,4 +69,4 @@ const Message = ({
   );
 };
 
-export default Message; 
+export default Message;

@@ -61,7 +61,8 @@ async def stream_and_save(
                 chat_request.temperature,
                 chat_request.max_tokens,
                 chat_request.context,
-                chat_request.prompt
+                chat_request.prompt,
+                chat_request.images
             )
         else:
             stream = api_call(
@@ -102,6 +103,19 @@ async def create_chat(chat: schemas.ChatRequest, db: Session = Depends(get_db)):
     - 返回: 包含 AI 回應的對話記錄
     """
     try:
+        # Force API type to OpenAI if images are present
+        if chat.images and len(chat.images) > 0:
+            if chat.api_type != 'openai':
+                logger.info(f"Images detected, forcing API type from {chat.api_type} to openai")
+                chat.api_type = 'openai'
+            
+            # Ensure we have OpenAI API key configured
+            if not os.getenv("OPENAI_API_KEY"):
+                raise HTTPException(
+                    status_code=400, 
+                    detail="OpenAI API key not configured. Cannot process images."
+                )
+
         api_call = None
         if chat.api_type == 'gemini':
             api_call = call_gemini_api
@@ -133,24 +147,27 @@ async def call_openai_api(
     max_tokens: int = 1000,
     context: list = [],
     prompt: str = "",
+    images: list = None,
 ) -> AsyncGenerator[str, None]:
     try:
         messages = []
-        system_message = SystemMessage(content=prompt)
-        messages.append(system_message)
+        if prompt:
+            system_message = SystemMessage(content=prompt)
+            messages.append(system_message)
 
         if prompt:
             logger.info(f"Prompt: {prompt}")
         if context:
             logger.info(f"Context: {context}")
         logger.info(f"User: {message}")
+        if images:
+            logger.info(f"Images: {len(images)} image(s) provided")
         logger.info(
             f"Params: model={model}, temperature={temperature}, max_tokens={max_tokens}"
         )
 
-        if len(context) == 0:
-            messages.append(HumanMessage(content=message))
-        else:
+        # Process context messages
+        if len(context) > 0:
             for h in context:
                 user_message = h["user_message"]
                 if h.get("file_content"):
@@ -162,8 +179,29 @@ async def call_openai_api(
                 if h.get("assistant_message") and h["assistant_message"] != "":
                     messages.append(AIMessage(content=h["assistant_message"]))
 
-        messages.append(HumanMessage(content=message))
-        logger.info(f"User: {message}")
+        # Create the current user message
+        if images and len(images) > 0:
+            # Handle vision request with images
+            message_content = []
+            
+            # Add text part
+            if message.strip():
+                message_content.append({"type": "text", "text": message})
+            
+            # Add image parts
+            for image in images:
+                image_content = {
+                    "type": "image_url",
+                    "image_url": {"url": image.base64}
+                }
+                message_content.append(image_content)
+            
+            messages.append(HumanMessage(content=message_content))
+            logger.info(f"Vision request: {len(images)} images with text: {message[:100]}...")
+        else:
+            # Regular text message
+            messages.append(HumanMessage(content=message))
+            logger.info(f"Text request: {message}")
 
         llm = ChatOpenAI(
             model_name=model, temperature=temperature, max_tokens=max_tokens, streaming=True

@@ -77,6 +77,7 @@ const ChatInterface = ({ userId }) => {
         onKeyPress={messageHandlers.handleKeyPress}
         models={chatState.models}
         apiType={chatState.apiType}
+        setApiType={chatState.setApiType} // 添加 setApiType 用於自動切換 API
         userId={userId}
         // Pass VectorDB handlers and loading state
         onAddDocuments={vectorDB.handleAddDocuments}

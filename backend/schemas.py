@@ -2,6 +2,12 @@
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 from uuid import UUID
+from typing import Optional, List
+
+class ImageData(BaseModel):
+    base64: str
+    name: str
+    type: str
 
 class ChatRequest(BaseModel):
     session_id: UUID
@@ -13,6 +19,7 @@ class ChatRequest(BaseModel):
     prompt: str = ""
     api_type: str = "openai"
     user_id: UUID | None = None
+    images: Optional[List[ImageData]] = None
 
 class ChatResponse(BaseModel):
     turn_id: UUID
