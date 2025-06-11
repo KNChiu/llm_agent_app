@@ -2,16 +2,40 @@ import { chatService } from '../../../services/api';
 import { COPY_TIMEOUT } from '../../../config/chat';
 
 export const useMessageHandlers = (chatState) => {
-  const handleSendMessage = async (selectedFeature = null, fileContent = '', apiType, userId = null) => {
-    if (!chatState.inputMessage.trim() && !fileContent) return;
+  const handleSendMessage = async (selectedFeature = null, contentData = '', apiType, userId = null) => {
+    // Handle different content types
+    let messageText = '';
+    let fileContent = '';
+    let images = [];
+    
+    if (typeof contentData === 'object' && contentData !== null) {
+      // Handle image data from chat mode
+      if (contentData.message !== undefined && contentData.images) {
+        messageText = contentData.message || '';
+        images = contentData.images || [];
+      }
+      // Handle document data from summary mode
+      else if (contentData.question && contentData.documents) {
+        messageText = contentData.question;
+        fileContent = contentData.documents;
+      }
+    } else {
+      // Handle simple file content or text
+      messageText = chatState.inputMessage.trim();
+      fileContent = contentData;
+    }
+
+    // Check if we have any content to send
+    if (!messageText.trim() && !fileContent && images.length === 0) return;
     if (chatState.isLoading) return;
 
     const userMessage = {
       id: Date.now().toString(), // Unique ID for user message
-      text: chatState.inputMessage.trim(),
+      text: messageText,
       sender: 'user',
       timestamp: new Date().toISOString(),
       fileContent,
+      images: images.length > 0 ? images : undefined, // Include images if present
     };
 
     // Add user message and an initial empty assistant message for streaming

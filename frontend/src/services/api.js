@@ -62,6 +62,35 @@ export const chatService = {
         return acc;
       }, []);
 
+      // Prepare request body
+      const requestBody = {
+        session_id: session_id,
+        prompt: prompt,
+        message: userMessage.text,
+        context: formattedContext,
+        model,
+        temperature,
+        max_tokens: maxTokens,
+        api_type: apiType,
+        user_id: user_id
+      };
+
+      // Add image data if present
+      if (userMessage.images && userMessage.images.length > 0) {
+        // Extract base64 data from images
+        requestBody.images = userMessage.images.map(img => ({
+          base64: img.base64,
+          name: img.name,
+          type: img.type
+        }));
+        
+        // Force API type to OpenAI if images are present
+        if (apiType !== 'openai') {
+          console.log('Forcing API type to OpenAI for image processing');
+          requestBody.api_type = 'openai';
+        }
+      }
+
       const endpoint = `${API_BASE_URL}/chat`; // Use API_BASE_URL
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -69,17 +98,7 @@ export const chatService = {
           'Content-Type': 'application/json',
           // Add any other necessary headers, e.g., Authorization
         },
-        body: JSON.stringify({
-          session_id: session_id,
-          prompt: prompt,
-          message: userMessage.text,
-          context: formattedContext,
-          model,
-          temperature,
-          max_tokens: maxTokens,
-          api_type: apiType,
-          user_id: user_id
-        })
+        body: JSON.stringify(requestBody)
       });
 
       if (!response.ok) {
