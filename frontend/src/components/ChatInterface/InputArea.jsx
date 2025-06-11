@@ -330,9 +330,6 @@ const InputArea = ({
                   >
                     <XMarkIcon className="w-3 h-3" />
                   </button>
-                  <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 rounded-b truncate">
-                    {image.name}
-                  </div>
                 </div>
               ))}
             </div>
