@@ -226,6 +226,51 @@ const InputArea = ({
     }
   };
 
+  // 處理貼上事件
+  const handlePaste = async (e) => {
+    if (selectedFeature.mode !== 'chat' || isDisabled) return;
+
+    const clipboardData = e.clipboardData || window.clipboardData;
+    const items = clipboardData.items;
+
+    const imageFiles = [];
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.indexOf('image') !== -1) {
+        e.preventDefault(); // 阻止預設的貼上行為
+        const file = item.getAsFile();
+        if (file) {
+          try {
+            // 將圖片轉換為 base64
+            const base64Data = await new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = (e) => resolve(e.target.result);
+              reader.onerror = reject;
+              reader.readAsDataURL(file);
+            });
+
+            imageFiles.push({
+              file,
+              name: `pasted-image-${Date.now()}-${i}.png`,
+              size: file.size,
+              type: file.type,
+              base64: base64Data,
+              preview: base64Data // 用於預覽
+            });
+          } catch (error) {
+            console.error('Failed to convert pasted image to base64:', error);
+            handleError('圖片處理失敗');
+          }
+        }
+      }
+    }
+
+    if (imageFiles.length > 0) {
+      console.log('Pasted', imageFiles.length, 'images');
+      handleImageAdd(imageFiles);
+    }
+  };
+
   const textareaRef = useRef(null);
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -343,6 +388,7 @@ const InputArea = ({
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyDown={handleKeyPress}
+                  onPaste={handlePaste}
                   placeholder={selectedFeature?.placeholder || '輸入訊息...'}
                   className="w-full p-2 focus:outline-none resize-none overflow-y-auto"
                   disabled={isDisabled || (selectedFeature.mode === 'summary' && !!fileContent)}
@@ -381,26 +427,6 @@ const InputArea = ({
                 </div>
               )}
 
-              {/* 圖片上傳按鈕 - 對話模式 */}
-              {selectedFeature.mode === 'chat' && (
-                <div className="px-2">
-                  <input
-                    type="file"
-                    accept="image/jpeg, image/png, image/gif, image/webp"
-                    multiple
-                    onChange={(e) => handleImageSelect(e, handleImageAdd, handleError)}
-                    className="hidden"
-                    id="image-upload"
-                    disabled={isDisabled}
-                  />
-                  <label
-                    htmlFor="image-upload"
-                    className={`cursor-pointer text-blue-500 hover:text-blue-600 ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    <PhotoIcon className="w-5 h-5" />
-                  </label>
-                </div>
-              )}
             </div>
 
             <button
