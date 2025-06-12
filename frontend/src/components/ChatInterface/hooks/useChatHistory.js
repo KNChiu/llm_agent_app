@@ -15,11 +15,17 @@ export const useChatHistory = (userId = null) => {
 
   const fetchChatHistory = useCallback(async (page = 0, append = false, force = false) => {
     // 防止重複請求
-    if (isLoadingHistory) return;
+    if (isLoadingHistory) {
+      return;
+    }
     
     // 檢查是否需要請求
-    if (!append && !hasMoreHistory && historyMessages.length > 0 && !force) return;
-    if (page === historyPage && historyMessages.length > 0 && !append && !force) return;
+    if (!append && !hasMoreHistory && historyMessages.length > 0 && !force) {
+      return;
+    }
+    if (page === historyPage && historyMessages.length > 0 && !append && !force) {
+      return;
+    }
     
     // 檢查分頁限制
     if (append && loadedPagesCount >= MAX_LOADED_PAGES) {
@@ -41,7 +47,7 @@ export const useChatHistory = (userId = null) => {
       setHasMoreHistory(
         loadedPagesCount + 1 < MAX_LOADED_PAGES 
           ? history.hasMore 
-          : false
+          : false,
       );
       
       // 格式化歷史記錄
@@ -68,7 +74,7 @@ export const useChatHistory = (userId = null) => {
 
       // 更新消息列表
       setHistoryMessages(prev => 
-        append ? [...prev, ...formattedHistory] : formattedHistory
+        append ? [...prev, ...formattedHistory] : formattedHistory,
       );
       
       setHistoryPage(page);
@@ -93,7 +99,7 @@ export const useChatHistory = (userId = null) => {
     historyPage, 
     loadedPagesCount, 
     MAX_LOADED_PAGES, 
-    currentUserId
+    currentUserId,
   ]);
 
   const loadMoreHistory = useCallback(() => {

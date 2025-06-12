@@ -194,7 +194,7 @@ const InputArea = ({
       // 對話模式且有圖片 - 傳送圖片和文字
       await onSendMessage(selectedFeature, {
         message: inputMessage,
-        images: uploadedImages
+        images: uploadedImages,
       }, apiType, userId);
       
       // 清除輸入內容和圖片
@@ -228,7 +228,9 @@ const InputArea = ({
 
   // 處理貼上事件
   const handlePaste = async (e) => {
-    if (selectedFeature.mode !== 'chat' || isDisabled) return;
+    if (selectedFeature.mode !== 'chat' || isDisabled) {
+return;
+}
 
     const clipboardData = e.clipboardData || window.clipboardData;
     const items = clipboardData.items;
@@ -255,7 +257,7 @@ const InputArea = ({
               size: file.size,
               type: file.type,
               base64: base64Data,
-              preview: base64Data // 用於預覽
+              preview: base64Data, // 用於預覽
             });
           } catch (error) {
             console.error('Failed to convert pasted image to base64:', error);

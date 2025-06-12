@@ -7,7 +7,6 @@ module.exports = {
   },
   extends: [
     'eslint:recommended',
-    '@vitejs/eslint-config-react',
     'plugin:react/recommended',
     'plugin:react-hooks/recommended',
   ],
@@ -57,7 +56,7 @@ module.exports = {
     'eqeqeq': ['error', 'always'],
     'curly': ['error', 'all'],
     'brace-style': ['error', '1tbs'],
-    'comma-dangle': ['error', 'es5'],
+    'comma-dangle': ['error', 'always-multiline'],
     'semi': ['error', 'always'],
     'quotes': ['error', 'single', { 
       avoidEscape: true,
@@ -84,9 +83,14 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['**/__tests__/**/*', '**/*.test.*', '**/*.spec.*'],
+      files: ['**/__tests__/**/*', '**/*.test.*', '**/*.spec.*', '**/setupTests.js'],
       env: {
         jest: true,
+        node: true,
+      },
+      globals: {
+        global: 'readonly',
+        process: 'readonly',
       },
       rules: {
         'no-console': 'off', // 測試中允許 console

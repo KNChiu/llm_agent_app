@@ -8,7 +8,7 @@ const Message = memo(({
   copiedMessageId, 
   copiedCodeIndex,
   onCopyMessage,
-  onCopyCode 
+  onCopyCode, 
 }) => {
   const isUser = message.sender === 'user';
 

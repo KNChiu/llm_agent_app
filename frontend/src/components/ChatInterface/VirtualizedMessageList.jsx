@@ -11,7 +11,7 @@ const VirtualizedMessageList = memo(({
   copiedCodeIndex,
   onCopyMessage,
   onCopyCode,
-  containerHeight = 500
+  containerHeight = 500,
 }) => {
   const containerRef = useRef(null);
   const [scrollTop, setScrollTop] = useState(0);
@@ -22,7 +22,7 @@ const VirtualizedMessageList = memo(({
     const startIndex = Math.max(0, Math.floor(scrollTop / ITEM_HEIGHT) - BUFFER_SIZE);
     const endIndex = Math.min(
       messages.length - 1,
-      Math.ceil((scrollTop + containerSize.height) / ITEM_HEIGHT) + BUFFER_SIZE
+      Math.ceil((scrollTop + containerSize.height) / ITEM_HEIGHT) + BUFFER_SIZE,
     );
     return { startIndex, endIndex };
   }, [scrollTop, containerSize.height, messages.length]);
@@ -43,10 +43,10 @@ const VirtualizedMessageList = memo(({
   // 監聽容器大小變化
   useEffect(() => {
     const resizeObserver = new ResizeObserver((entries) => {
-      for (let entry of entries) {
+      for (const entry of entries) {
         setContainerSize({
           width: entry.contentRect.width,
-          height: entry.contentRect.height
+          height: entry.contentRect.height,
         });
       }
     });

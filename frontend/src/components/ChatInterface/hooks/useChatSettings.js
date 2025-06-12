@@ -33,7 +33,7 @@ export const useChatSettings = () => {
     
     return {
       isValid: Object.keys(errors).length === 0,
-      errors
+      errors,
     };
   }, [selectedModel, temperature, maxTokens]);
 

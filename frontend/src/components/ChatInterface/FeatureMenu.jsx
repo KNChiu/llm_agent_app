@@ -4,7 +4,7 @@ import {
   ChatBubbleLeftRightIcon, 
   MagnifyingGlassIcon, 
   DocumentTextIcon,
-  LanguageIcon
+  LanguageIcon,
 } from '@heroicons/react/24/outline';
 
 export const defaultFeatures = [
@@ -16,9 +16,9 @@ export const defaultFeatures = [
     buttonText: '發送',
     colors: {
       bg: 'text-blue-500 bg-blue-50',
-      button: 'bg-blue-500'
+      button: 'bg-blue-500',
     },
-    prompt: '請以專業且友善通順的繁體中文臺灣用語回答以下問題：'
+    prompt: '請以專業且友善通順的繁體中文臺灣用語回答以下問題：',
   },
   { 
     icon: MagnifyingGlassIcon, 
@@ -28,9 +28,9 @@ export const defaultFeatures = [
     buttonText: '搜尋',
     colors: {
       bg: 'text-purple-500 bg-purple-50',
-      button: 'bg-purple-500'
+      button: 'bg-purple-500',
     },
-    prompt: '請幫我在網路中搜尋相關的資訊：'
+    prompt: '請幫我在網路中搜尋相關的資訊：',
   },
   { 
     icon: DocumentTextIcon, 
@@ -40,9 +40,9 @@ export const defaultFeatures = [
     buttonText: '詢問',
     colors: {
       bg: 'text-green-500 bg-green-50',
-      button: 'bg-green-500'
+      button: 'bg-green-500',
     },
-    prompt: '請幫我參考 "FileContent" 的內容使用通順的繁體中文臺灣用語回答'
+    prompt: '請幫我參考 "FileContent" 的內容使用通順的繁體中文臺灣用語回答',
   },
   { 
     icon: LanguageIcon, 
@@ -52,9 +52,9 @@ export const defaultFeatures = [
     buttonText: '翻譯',
     colors: {
       bg: 'text-green-500 bg-green-50',
-      button: 'bg-green-500'
+      button: 'bg-green-500',
     },
-    prompt: '請幫我翻譯以下內容(如果輸入的是英文就翻譯成通順的繁體中文台灣用語，如果是中文就翻譯成標準的英文)：'
+    prompt: '請幫我翻譯以下內容(如果輸入的是英文就翻譯成通順的繁體中文台灣用語，如果是中文就翻譯成標準的英文)：',
   },
 ];
 

@@ -6,12 +6,12 @@ import { useChatSettings } from '../useChatSettings';
 jest.mock('../../../config/chat', () => ({
   MODELS: [
     { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
-    { value: 'gpt-4', label: 'GPT-4' }
+    { value: 'gpt-4', label: 'GPT-4' },
   ],
   DEFAULT_MODEL: 'gpt-3.5-turbo',
   DEFAULT_TEMPERATURE: 0.7,
   DEFAULT_MAX_TOKENS: 1000,
-  DEFAULT_API_TYPE: 'openai'
+  DEFAULT_API_TYPE: 'openai',
 }));
 
 describe('useChatSettings', () => {
@@ -33,7 +33,7 @@ describe('useChatSettings', () => {
         selectedModel: 'gpt-4',
         temperature: 0.5,
         maxTokens: 2000,
-        apiType: 'gemini'
+        apiType: 'gemini',
       });
     });
     
@@ -102,7 +102,7 @@ describe('useChatSettings', () => {
       model: 'gpt-3.5-turbo',
       temperature: 0.7,
       maxTokens: 1000,
-      apiType: 'openai'
+      apiType: 'openai',
     });
   });
 });

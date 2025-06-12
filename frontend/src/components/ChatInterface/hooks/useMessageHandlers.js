@@ -13,9 +13,8 @@ export const useMessageHandlers = (chatState) => {
       if (contentData.message !== undefined && contentData.images) {
         messageText = contentData.message || '';
         images = contentData.images || [];
-      }
-      // Handle document data from summary mode
-      else if (contentData.question && contentData.documents) {
+      } else if (contentData.question && contentData.documents) {
+        // Handle document data from summary mode
         messageText = contentData.question;
         fileContent = contentData.documents;
       }
@@ -26,8 +25,12 @@ export const useMessageHandlers = (chatState) => {
     }
 
     // Check if we have any content to send
-    if (!messageText.trim() && !fileContent && images.length === 0) return;
-    if (chatState.isLoading) return;
+    if (!messageText.trim() && !fileContent && images.length === 0) {
+return;
+}
+    if (chatState.isLoading) {
+return;
+}
 
     const userMessage = {
       id: Date.now().toString(), // Unique ID for user message
@@ -51,7 +54,7 @@ export const useMessageHandlers = (chatState) => {
     chatState.setCurrentMessages((prevMessages) => [
       ...prevMessages,
       userMessage,
-      initialAssistantMessage
+      initialAssistantMessage,
     ]);
     
     chatState.setInputMessage('');
@@ -76,8 +79,8 @@ export const useMessageHandlers = (chatState) => {
             prevMessages.map((msg) =>
               msg.id === assistantMessageId
                 ? { ...msg, text: msg.text + chunk }
-                : msg
-            )
+                : msg,
+            ),
           );
         },
         (error) => { // onError callback
@@ -86,8 +89,8 @@ export const useMessageHandlers = (chatState) => {
             prevMessages.map((msg) =>
               msg.id === assistantMessageId
                 ? { ...msg, text: msg.text + `\nError: ${error.message}` } // Append error to the message
-                : msg
-            )
+                : msg,
+            ),
           );
           chatState.setIsLoading(false);
         },
@@ -97,7 +100,7 @@ export const useMessageHandlers = (chatState) => {
           chatState.setIsLoading(false);
           // The message text is already updated by onChunk.
           // If backend saves and returns a final timestamp or turn_id, update here.
-        }
+        },
       );
 
     } catch (error) {
@@ -107,8 +110,8 @@ export const useMessageHandlers = (chatState) => {
         prevMessages.map((msg) =>
           msg.id === assistantMessageId
             ? { ...msg, text: msg.text + `\nError: Failed to send message` }
-            : msg
-        )
+            : msg,
+        ),
       );
       chatState.setIsLoading(false); 
     }

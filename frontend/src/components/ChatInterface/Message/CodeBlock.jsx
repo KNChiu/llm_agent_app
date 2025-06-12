@@ -6,7 +6,7 @@ const CodeBlock = ({ code, language, index, copiedCodeIndex, onCopyCode }) => {
   try {
     const highlightedCode = hljs.highlight(code, {
       language: language || 'plaintext',
-      ignoreIllegals: true
+      ignoreIllegals: true,
     }).value;
 
     return (
@@ -34,7 +34,7 @@ const CodeBlock = ({ code, language, index, copiedCodeIndex, onCopyCode }) => {
               background: '#1a1a1a',
               padding: '1rem',
               borderRadius: '0 0 0.5rem 0.5rem',
-              overflowX: 'auto'
+              overflowX: 'auto',
             }}
           />
         </pre>

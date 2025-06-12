@@ -21,7 +21,9 @@ export const useChatMessages = () => {
 
   const updateLastMessage = useCallback((updater) => {
     setCurrentMessages(prev => {
-      if (prev.length === 0) return prev;
+      if (prev.length === 0) {
+return prev;
+}
       const newMessages = [...prev];
       const lastIndex = newMessages.length - 1;
       if (typeof updater === 'function') {

@@ -99,7 +99,7 @@ apiClient.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 // 其他服務函式保持不變
@@ -112,7 +112,7 @@ export const chatService = {
           acc.push({
             user_message: msg.text,
             assistant_message: array[index + 1]?.sender === 'assistant' ? array[index + 1].text : '',
-            file_content: msg.fileContent || ''
+            file_content: msg.fileContent || '',
           });
         }
         return acc;
@@ -128,7 +128,7 @@ export const chatService = {
         temperature,
         max_tokens: maxTokens,
         api_type: apiType,
-        user_id: user_id
+        user_id: user_id,
       };
 
       // Add image data if present
@@ -137,7 +137,7 @@ export const chatService = {
         requestBody.images = userMessage.images.map(img => ({
           base64: img.base64,
           name: img.name,
-          type: img.type
+          type: img.type,
         }));
         
         // Force API type to OpenAI if images are present
@@ -154,19 +154,23 @@ export const chatService = {
           'Content-Type': 'application/json',
           // Add any other necessary headers, e.g., Authorization
         },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
         // Handle HTTP errors (e.g., 4xx, 5xx)
         const errorData = await response.json().catch(() => ({ detail: response.statusText }));
         console.error('Error sending message (stream):', errorData);
-        if (onError) onError(new Error(errorData.detail || 'Failed to send message'));
+        if (onError) {
+onError(new Error(errorData.detail || 'Failed to send message'));
+}
         return; // Stop further processing
       }
 
       if (!response.body) {
-        if (onError) onError(new Error('Response body is null'));
+        if (onError) {
+onError(new Error('Response body is null'));
+}
         return;
       }
 
@@ -182,14 +186,20 @@ export const chatService = {
         }
         const chunk = decoder.decode(value, { stream: true });
         accumulatedResponse += chunk;
-        if (onChunk) onChunk(chunk); // Pass the raw chunk
+        if (onChunk) {
+onChunk(chunk);
+} // Pass the raw chunk
       }
       
-      if (onComplete) onComplete(accumulatedResponse); // Pass the full response on completion
+      if (onComplete) {
+onComplete(accumulatedResponse);
+} // Pass the full response on completion
 
     } catch (error) {
       console.error('Error sending message (stream):', error);
-      if (onError) onError(error);
+      if (onError) {
+onError(error);
+}
     }
   },
 
@@ -201,7 +211,7 @@ export const chatService = {
           acc.push({
             user_message: msg.text,
             assistant_message: array[index + 1]?.sender === 'assistant' ? array[index + 1].text : '',
-            file_content: msg.fileContent || '' // 添加 fileContent
+            file_content: msg.fileContent || '', // 添加 fileContent
           });
         }
         return acc;
@@ -217,7 +227,7 @@ export const chatService = {
         temperature,
         max_tokens: maxTokens,
         api_type: apiType,
-        user_id: user_id
+        user_id: user_id,
       });
       return response.data;
     } catch (error) {
@@ -230,7 +240,9 @@ export const chatService = {
   getChatHistory: async (skip = 0, limit = 20, user_id = null) => {
     try {
       const params = { skip, limit };
-      if (user_id) params.user_id = user_id;
+      if (user_id) {
+params.user_id = user_id;
+}
       
       const response = await apiClient.get('/history', {
         params: params,
@@ -242,7 +254,7 @@ export const chatService = {
         total: response.data.total || 0,
         page: response.data.page || 0,
         limit: response.data.limit || limit,
-        hasMore: response.data.has_more
+        hasMore: response.data.has_more,
       };
     } catch (error) {
       console.error('Error fetching chat history:', error);
@@ -254,10 +266,12 @@ export const chatService = {
   getSessionChatHistory: async (sessionId, user_id = null) => {
     try {
       const params = {};
-      if (user_id) params.user_id = user_id;
+      if (user_id) {
+params.user_id = user_id;
+}
       
       const response = await apiClient.get(`/history/session/${sessionId}`, {
-        params: params
+        params: params,
       });
       return response.data;
     } catch (error) {
@@ -272,16 +286,16 @@ export const chatService = {
       const response = await apiClient.get('/health');
       return {
         status: response.data.status === 'ok',
-        timestamp: response.data.timestamp
+        timestamp: response.data.timestamp,
       };
     } catch (error) {
       console.error('Health check failed:', error);
       return {
         status: false,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
     }
-  }
+  },
 };
 
 // VectorDB 服務函式
@@ -300,17 +314,17 @@ export const vectorDBService = {
   },
 
   // 添加文件到 VectorDB
-  addDocuments: async (session_id, document, document_id = null, chunk_size = 200, chunk_overlap = 50, type = "txt") => {
-    console.log("session_id:", session_id)
+  addDocuments: async (session_id, document, document_id = null, chunk_size = 200, chunk_overlap = 50, type = 'txt') => {
+    console.log('session_id:', session_id);
     try {
       const response = await apiClient.post('/vectordb/add', { // POST request with body
         document,
         document_id,
         chunk_size,
         chunk_overlap,
-        type
+        type,
       }, {
-        params: { session_id } // session_id as query parameter
+        params: { session_id }, // session_id as query parameter
       });
       return response.data;
     } catch (error) {
@@ -343,5 +357,5 @@ export const vectorDBService = {
       console.error('Error deleting VectorDB collection:', error);
       throw error;
     }
-  }
+  },
 };

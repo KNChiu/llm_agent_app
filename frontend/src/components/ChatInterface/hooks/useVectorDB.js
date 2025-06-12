@@ -45,7 +45,7 @@ export const useVectorDB = (sessionId) => {
     }
   }, [sessionId, isDbInitializedForSession]); // Add isDbInitializedForSession dependency
 
-  const handleAddDocuments = useCallback(async (document, document_id = null, chunk_size = 1000, chunk_overlap = 200, type = "txt") => {
+  const handleAddDocuments = useCallback(async (document, document_id = null, chunk_size = 1000, chunk_overlap = 200, type = 'txt') => {
     if (!sessionId || !document) {
        console.warn('Cannot add document without session ID or document content');
        return false; // Indicate failure

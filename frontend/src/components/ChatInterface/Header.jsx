@@ -8,7 +8,7 @@ const Header = ({
   showSettings, 
   setShowSettings,
   handleNewChat = () => {},
-  fetchChatHistory = () => {}
+  fetchChatHistory = () => {},
 }) => {
   const handleHistoryClick = () => {
     setShowHistory(!showHistory);

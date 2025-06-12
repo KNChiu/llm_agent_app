@@ -29,7 +29,7 @@ export const useChatStateRefactored = (userId = null) => {
         (messages, sessionId) => {
           messageHook.setCurrentMessages(messages);
           messageHook.setSessionId(sessionId);
-        }
+        },
       );
       return messages;
     } catch (error) {
