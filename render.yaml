@@ -22,7 +22,8 @@ services:
         sync: false
     
   # 前端服務
-  - type: static
+  - type: web
+    runtime: static
     name: llm-chatbot-frontend
     buildCommand: npm ci && npm run build
     staticPublishPath: ./dist
