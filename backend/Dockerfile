@@ -56,5 +56,9 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
 # 暴露端口
 EXPOSE 8000
 
-# 使用 gunicorn 作為 WSGI 服務器（生產環境）
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker"] 
+# 複製啟動腳本
+COPY --chown=appuser:appuser start.sh .
+RUN chmod +x start.sh
+
+# 使用啟動腳本（支持環境變數配置）
+CMD ["./start.sh"] 

@@ -6,8 +6,8 @@ WORKDIR /app
 # 複製 package 文件
 COPY package*.json ./
 
-# 使用 npm ci 進行更快的生產安裝
-RUN npm ci --only=production --silent
+# 安裝所有依賴（包含 devDependencies 用於構建）
+RUN npm ci --silent
 
 # 複製源代碼
 COPY . .
@@ -60,11 +60,16 @@ RUN addgroup -g 1001 -S nodejs && \
     adduser -S nextjs -u 1001
 
 # 複製 package 文件
-COPY --chown=nextjs:nodejs package*.json ./
+COPY package*.json ./
 
-# 切換用戶並安裝依賴
-USER nextjs
+# 安裝依賴（在 root 用戶下進行）
 RUN npm ci --silent
+
+# 創建非 root 用戶並設置權限
+RUN chown -R nextjs:nodejs /app
+
+# 切換用戶
+USER nextjs
 
 # 複製應用代碼
 COPY --chown=nextjs:nodejs . .
