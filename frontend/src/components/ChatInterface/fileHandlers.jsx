@@ -1,4 +1,4 @@
-import { getDocument } from 'react-pdf';
+import { pdfjs } from 'react-pdf';
 
 // 支援的圖片格式
 const SUPPORTED_IMAGE_TYPES = [
@@ -117,17 +117,22 @@ export const handleImageSelect = async (e, onImageAdd, onError) => {
 
 // 提取 PDF 檔案中的文字
 const extractTextFromPDF = async (file) => {
-  const pdfData = await file.arrayBuffer();
-  const pdf = await getDocument({ data: pdfData }).promise;
-  let textContent = '';
+  try {
+    const pdfData = await file.arrayBuffer();
+    const pdf = await pdfjs.getDocument({ data: pdfData }).promise;
+    let textContent = '';
 
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const text = await page.getTextContent();
-    textContent += text.items.map(item => item.str).join(' ') + '\n';
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const text = await page.getTextContent();
+      textContent += text.items.map(item => item.str).join(' ') + '\n';
+    }
+
+    return textContent;
+  } catch (error) {
+    console.error('PDF text extraction failed:', error);
+    throw new Error('無法提取 PDF 文本內容');
   }
-
-  return textContent;
 };
 
 // 提取 TXT 檔案中的文字
