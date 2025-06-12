@@ -7,3 +7,5 @@ frontend/node_modules
 backend/logs/
 mcp_data/
 frontend/package-lock.json
+.mcp.json
+CLAUDE.md
