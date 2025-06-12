@@ -10,7 +10,7 @@ const ChatHistory = ({
   hasMoreHistory,
   setCurrentUserId = () => {},
   fetchChatHistory = () => {},
-  currentUserId = null
+  currentUserId = null,
 }) => {
   const containerRef = useRef(null);
   const [isNearBottom, setIsNearBottom] = useState(false);
@@ -28,7 +28,9 @@ const ChatHistory = ({
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    if (!container) {
+return;
+}
 
     const handleScroll = () => {
       const { scrollTop, scrollHeight, clientHeight } = container;
@@ -71,7 +73,7 @@ const ChatHistory = ({
 
   // 準備標題的提示文字
   const titleStyle = {
-    cursor: 'pointer'
+    cursor: 'pointer',
   };
 
   return (
@@ -138,7 +140,7 @@ const ChatHistory = ({
         
         {!hasMoreHistory && historyMessages.length > 0 && (
           <div className="text-center text-gray-500 text-sm py-4">
-            {historyMessages.length >= 100 ? "已達載入上限，僅顯示最近5頁記錄" : "沒有更多記錄了"}
+            {historyMessages.length >= 100 ? '已達載入上限，僅顯示最近5頁記錄' : '沒有更多記錄了'}
           </div>
         )}
       </div>

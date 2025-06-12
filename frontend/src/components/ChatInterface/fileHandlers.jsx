@@ -1,11 +1,11 @@
-// import { Document, Page, pdfjs, getDocument } from 'react-pdf';
+import { pdfjs } from 'react-pdf';
 
 // 支援的圖片格式
 const SUPPORTED_IMAGE_TYPES = [
   'image/jpeg',
   'image/png',
   'image/gif',
-  'image/webp'
+  'image/webp',
 ];
 
 // 最大檔案大小 (5MB)
@@ -40,14 +40,14 @@ export const validateImageFile = (file) => {
   if (!SUPPORTED_IMAGE_TYPES.includes(file.type)) {
     return { 
       valid: false, 
-      error: '不支援的檔案格式。請選擇 JPG、PNG、GIF 或 WebP 格式的圖片。' 
+      error: '不支援的檔案格式。請選擇 JPG、PNG、GIF 或 WebP 格式的圖片。', 
     };
   }
 
   if (file.size > MAX_IMAGE_SIZE) {
     return { 
       valid: false, 
-      error: `檔案大小超過限制。請選擇小於 ${MAX_IMAGE_SIZE / (1024 * 1024)}MB 的圖片。` 
+      error: `檔案大小超過限制。請選擇小於 ${MAX_IMAGE_SIZE / (1024 * 1024)}MB 的圖片。`, 
     };
   }
 
@@ -69,7 +69,7 @@ export const convertImageToBase64 = (file) => {
 // 處理圖片拖曳上傳
 export const handleImageDrop = async (files, onImageAdd, onError) => {
   const imageFiles = Array.from(files).filter(file => 
-    SUPPORTED_IMAGE_TYPES.includes(file.type)
+    SUPPORTED_IMAGE_TYPES.includes(file.type),
   );
 
   if (imageFiles.length === 0) {
@@ -94,7 +94,7 @@ export const handleImageDrop = async (files, onImageAdd, onError) => {
         size: file.size,
         type: file.type,
         base64: base64Data,
-        preview: base64Data // 用於預覽
+        preview: base64Data, // 用於預覽
       });
     }
 
@@ -117,17 +117,22 @@ export const handleImageSelect = async (e, onImageAdd, onError) => {
 
 // 提取 PDF 檔案中的文字
 const extractTextFromPDF = async (file) => {
-  const pdfData = await file.arrayBuffer();
-  const pdf = await getDocument({ data: pdfData }).promise;
-  let textContent = '';
+  try {
+    const pdfData = await file.arrayBuffer();
+    const pdf = await pdfjs.getDocument({ data: pdfData }).promise;
+    let textContent = '';
 
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const text = await page.getTextContent();
-    textContent += text.items.map(item => item.str).join(' ') + '\n';
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const text = await page.getTextContent();
+      textContent += text.items.map(item => item.str).join(' ') + '\n';
+    }
+
+    return textContent;
+  } catch (error) {
+    console.error('PDF text extraction failed:', error);
+    throw new Error('無法提取 PDF 文本內容');
   }
-
-  return textContent;
 };
 
 // 提取 TXT 檔案中的文字

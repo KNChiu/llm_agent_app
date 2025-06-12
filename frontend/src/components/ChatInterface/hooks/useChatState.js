@@ -29,13 +29,19 @@ export const useChatState = (userId = null) => {
   // 使用 useCallback 優化函數
   const fetchChatHistory = useCallback(async (page = 0, append = false, force = false) => {
     // 已經在載入中，直接返回
-    if (isLoadingHistory) return;
+    if (isLoadingHistory) {
+return;
+}
     
     // 如果不是追加模式且已經沒有更多歷史記錄，直接返回（但如果是強制刷新則忽略此檢查）
-    if (!append && !hasMoreHistory && historyMessages.length > 0 && !force) return;
+    if (!append && !hasMoreHistory && historyMessages.length > 0 && !force) {
+return;
+}
     
     // 檢查是否請求相同頁面但已有數據，避免重複請求（但如果是強制刷新則忽略此檢查）
-    if (page === historyPage && historyMessages.length > 0 && !append && !force) return;
+    if (page === historyPage && historyMessages.length > 0 && !append && !force) {
+return;
+}
     
     // 檢查是否已達到最大頁數限制（僅適用於分頁載入）
     if (append && loadedPagesCount >= MAX_LOADED_PAGES) {
@@ -59,7 +65,7 @@ export const useChatState = (userId = null) => {
       setHasMoreHistory(
         loadedPagesCount + 1 < MAX_LOADED_PAGES 
           ? history.hasMore 
-          : false
+          : false,
       );
       
       const formattedHistory = history.items.map((msg) => ({
@@ -85,7 +91,7 @@ export const useChatState = (userId = null) => {
 
       // 更新消息列表，追加或重置
       setHistoryMessages(prev => 
-        append ? [...prev, ...formattedHistory] : formattedHistory
+        append ? [...prev, ...formattedHistory] : formattedHistory,
       );
       
       // 更新頁碼

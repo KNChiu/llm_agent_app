@@ -1,14 +1,14 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Copy, Check } from 'lucide-react';
 import MessageContent from './MessageContent';
 import { formatDateTime } from '../../../utils/dateTime';
 
-const Message = ({ 
+const Message = memo(({ 
   message, 
   copiedMessageId, 
   copiedCodeIndex,
   onCopyMessage,
-  onCopyCode 
+  onCopyCode, 
 }) => {
   const isUser = message.sender === 'user';
 
@@ -67,6 +67,9 @@ const Message = ({
       </div>
     </div>
   );
-};
+});
+
+// 添加顯示名稱以便調試
+Message.displayName = 'Message';
 
 export default Message;
