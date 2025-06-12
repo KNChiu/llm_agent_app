@@ -15,6 +15,10 @@
 🐳 容器化：Docker – 確保一致的環境  
 ☁️ 部署：Render + Docker & Supabase + PostgreSQL – 雲端解決方案  
 
+這是我首次嘗試「AI 編寫、AI 審查、人類整合」的開發流程
+未來程式碼將由 Claude 撰寫、Gemini 協助 Review
+Claude 也正式列入貢獻者行列
+
 ## 截圖
 ### 自適應畫面
 - Computer
