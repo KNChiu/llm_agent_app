@@ -40,8 +40,64 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error) => {
-    // 你的錯誤處理邏輯...
-    // （這裡省略錯誤處理邏輯，保持原樣）
+    // 統一錯誤處理邏輯
+    if (DEBUG_MODE) {
+      console.error('Response error:', {
+        url: error.config?.url,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message,
+      });
+    }
+
+    // 處理不同類型的錯誤
+    if (error.response) {
+      // 服務器響應了錯誤狀態碼
+      const status = error.response.status;
+      const message = error.response.data?.detail || error.response.statusText || '未知錯誤';
+      
+      switch (status) {
+        case 400:
+          console.error('請求參數錯誤:', message);
+          break;
+        case 401:
+          console.error('未授權訪問:', message);
+          break;
+        case 403:
+          console.error('訪問被禁止:', message);
+          break;
+        case 404:
+          console.error('請求的資源不存在:', message);
+          break;
+        case 500:
+          console.error('服務器內部錯誤:', message);
+          break;
+        case 502:
+          console.error('網關錯誤:', message);
+          break;
+        case 503:
+          console.error('服務不可用:', message);
+          break;
+        default:
+          console.error(`HTTP錯誤 ${status}:`, message);
+      }
+      
+      // 創建統一的錯誤對象
+      error.userMessage = message;
+      error.statusCode = status;
+    } else if (error.request) {
+      // 請求已發送但沒有收到響應
+      console.error('網絡錯誤: 無法連接到服務器');
+      error.userMessage = '網絡連接失敗，請檢查網絡連接';
+      error.statusCode = 0;
+    } else {
+      // 請求配置錯誤
+      console.error('請求配置錯誤:', error.message);
+      error.userMessage = '請求配置錯誤';
+      error.statusCode = -1;
+    }
+
     return Promise.reject(error);
   }
 );
